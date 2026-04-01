@@ -927,9 +927,29 @@
       "additional": 0,
       "total": 500,
       "rate": 36.66
+    },
+    {
+      "bidIdx": 18,
+      "사업명": "개정 어린이집 평가제 관련 의견조사",
+      "입찰일": "2025-11-17",
+      "연도": "2025",
+      "contract": 940,
+      "contractExVat": 855,
+      "alloc": 940,
+      "interview": 21,
+      "phone": 0,
+      "onlineFixed": 3,
+      "onlineGift": 187,
+      "onlineSms": 0,
+      "onlineSum": 190,
+      "extra": 0,
+      "indirect": 0,
+      "additional": 0,
+      "total": 211,
+      "rate": 24.68
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:59:47.304Z"
+    "lastUpdate": "2026-04-01T08:00:09.834Z"
   }
 }
