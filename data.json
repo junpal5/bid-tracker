@@ -727,9 +727,29 @@
       "additional": 750,
       "total": 7925,
       "rate": 47.12
+    },
+    {
+      "bidIdx": 8,
+      "사업명": "K-브랜드분쟁 대응전략 지원사업 만족도 조사",
+      "입찰일": "2025-04-08",
+      "연도": "2025",
+      "contract": 500,
+      "contractExVat": 455,
+      "alloc": 500,
+      "interview": 7,
+      "phone": 0,
+      "onlineFixed": 14,
+      "onlineGift": 0,
+      "onlineSms": 0,
+      "onlineSum": 14,
+      "extra": 0,
+      "indirect": 1,
+      "additional": 7,
+      "total": 29,
+      "rate": 6.37
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:54:48.571Z"
+    "lastUpdate": "2026-04-01T07:55:20.537Z"
   }
 }
