@@ -131,6 +131,14 @@ textarea{resize:vertical;min-height:60px}
 .score-compare-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;color:var(--text3);font-size:12px}
 .bid-name-col{width:var(--bid-name-col-width);min-width:var(--bid-name-col-width)}
 .bid-name-cell{max-width:var(--bid-name-col-width);min-width:var(--bid-name-col-width);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.comp-score-sheet{display:flex;flex-direction:column}
+.comp-score-sheet .modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:0;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.comp-score-sheet .modal-header h3{margin-bottom:0;display:block;flex:1;line-height:1.4}
+.comp-score-sheet-body{overflow-y:auto;padding-top:18px;padding-right:4px}
+.comp-score-summary{display:grid;gap:12px}
+.comp-score-stat{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.comp-score-price-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.load-more-wrap{display:flex;justify-content:center;margin-top:14px}
 /* PC/모바일 전용 표시 유틸리티 */
 .mobile-only{display:none}
 .pc-only{display:block}
@@ -212,6 +220,10 @@ textarea{resize:vertical;min-height:60px}
   .modal-overlay{padding:0;align-items:flex-end}
   .modal{max-width:100%;width:100%;border-radius:var(--radius) var(--radius) 0 0;max-height:92vh;padding:20px 16px}
   .modal-sm{max-width:100%}
+  .comp-score-sheet{height:calc(100vh - 24px - env(safe-area-inset-top,0px));max-height:calc(100vh - 24px - env(safe-area-inset-top,0px));padding:16px 14px calc(18px + 68px + env(safe-area-inset-bottom,0px))}
+  .comp-score-sheet .modal-header{position:sticky;top:0;background:var(--bg2);z-index:2;padding-top:2px}
+  .comp-score-sheet-body{padding-bottom:24px}
+  .comp-score-price-grid{grid-template-columns:1fr}
   .form-row.col2,.form-row.col3{grid-template-columns:1fr}
   .form-group{margin-bottom:12px}
   .form-label{font-size:13px}
@@ -431,6 +443,7 @@ textarea{resize:vertical;min-height:60px}
     <div class="table-wrap pc-only"><table><thead><tr><th>연도</th><th>입찰일</th><th class="bid-name-col">사업명</th><th>발주처</th><th>분야</th><th>유형</th><th>계약금액</th><th>기술평가</th><th>가격점수</th><th>경쟁사</th><th>낙찰사</th><th>결과</th><th>비용률</th><th>관리</th></tr></thead><tbody id="bids-tbody"></tbody></table></div>
     <!-- 모바일: 카드형 -->
     <div class="mobile-only" id="bids-cards"></div>
+    <div class="load-more-wrap"><button class="btn btn-outline" id="bids-load-more" onclick="loadMoreBids()" style="display:none;">더보기</button></div>
   </div>
 </div>
 
@@ -877,9 +890,12 @@ textarea{resize:vertical;min-height:60px}
 
 <!-- ══ MODAL: 경쟁사 점수 비교 ══ -->
 <div class="modal-overlay hidden" id="comp-score-modal">
-<div class="modal">
-  <h3><span id="comp-score-modal-title">입찰건별 점수 비교</span><button class="modal-close" onclick="closeModal('comp-score-modal')">✕</button></h3>
-  <div id="comp-score-modal-body"></div>
+<div class="modal comp-score-sheet">
+  <div class="modal-header">
+    <h3 id="comp-score-modal-title">입찰건별 점수 비교</h3>
+    <button class="modal-close" onclick="closeModal('comp-score-modal')">✕</button>
+  </div>
+  <div class="comp-score-sheet-body" id="comp-score-modal-body"></div>
 </div>
 </div>
 
@@ -972,6 +988,15 @@ const BF={year:'all',field:'all',type:'all',result:'all'};
 const CF={year:'all',status:'all'};
 const COMPF={year:'all',name:'all'};
 let HF={year:'all'}; // 홈 화면 연도 필터
+let bidsVisibleCount=10;
+
+function resetBidListVisible(){
+  bidsVisibleCount=10;
+}
+function loadMoreBids(){
+  bidsVisibleCount+=5;
+  renderBids();
+}
 
 function setHomeYear(val,el){
   HF.year=val;
@@ -982,6 +1007,7 @@ function setHomeYear(val,el){
 
 function setBidFilter(key,val,el){
   BF[key]=val;
+  resetBidListVisible();
   el.closest('.tab-filters').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   renderBids();
@@ -1454,7 +1480,7 @@ function buildCompetitorScoreDetail(b){
     const isW=b.낙찰사===c.name;
     return `<div class="calc-result" style="font-size:12px;${isW?'border-color:rgba(239,68,68,.4);color:#ef4444;background:rgba(239,68,68,.06);':''}">🎯 ${c.name}: <strong>${fmtMoney(c.추정제안가)}</strong>${isW?' (낙찰)':''}</div>`;
   }).join('');
-  return `<div class="mb16"><div style="font-size:14px;font-weight:700;">${b.사업명}</div><div class="score-compare-meta">${b.입찰일||''} · ${b.발주처||''} · ${fieldBadge(b.사업분야)} · 참여사 ${b.competitors.length+1}개</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">${winnerBadge(b.낙찰사,b.결과)}${resultBadge(b.결과)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">${bars}</div><div class="flex gap8" style="flex-wrap:wrap;"><div style="background:var(--bg3);border-radius:6px;padding:7px 12px;font-size:12px;">💰 우리 제안가: <strong>${fmtMoney(b.우리제안가)}</strong></div>${priceCards}</div>`;
+  return `<div class="comp-score-summary"><div><div style="font-size:14px;font-weight:700;">${b.사업명}</div><div class="score-compare-meta">${b.입찰일||''} · ${b.발주처||''} · ${fieldBadge(b.사업분야)} · 참여사 ${b.competitors.length+1}개</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;">${winnerBadge(b.낙찰사,b.결과)}${resultBadge(b.결과)}</div><div class="comp-score-stat"><div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;">우리 제안가</div><div style="font-size:20px;font-weight:800;color:var(--accent3);">${fmtMoney(b.우리제안가)}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">${bars}</div><div class="comp-score-price-grid">${priceCards||'<div class="text-sm text-muted">추정 제안가 데이터 없음</div>'}</div></div>`;
 }
 function openCompScoreModal(idx){
   const b=DB.bids[idx];
@@ -1802,8 +1828,9 @@ function renderBids(){
 
   // 목록
   const sorted=[...data].sort((a,b)=>(b.입찰일||'').localeCompare(a.입찰일||''));
+  const visibleItems=sorted.slice(0,bidsVisibleCount);
   const sc=(b,v)=>b.계약유형==='수의계약'?'<span style="font-size:11px;color:var(--text3);">—</span>':fmtScore(v);
-  document.getElementById('bids-tbody').innerHTML=sorted.length?sorted.map(b=>{const ri=DB.bids.indexOf(b);
+  document.getElementById('bids-tbody').innerHTML=visibleItems.length?visibleItems.map(b=>{const ri=DB.bids.indexOf(b);
     const costData=DB.costs.find(c=>c.bidIdx===ri);
     const rateCell=costData&&costData.rate!==null
       ?`<span style="font-weight:700;font-size:12px;${costData.rate<=40?'color:var(--success)':costData.rate<=60?'color:var(--warn)':'color:var(--danger)'}">${costData.rate.toFixed(1)}%</span>`
@@ -1830,7 +1857,7 @@ function renderBids(){
   // 모바일 카드형 렌더링
   const cardsEl=document.getElementById('bids-cards');
   if(cardsEl){
-    cardsEl.innerHTML=sorted.length?sorted.map(b=>{
+    cardsEl.innerHTML=visibleItems.length?visibleItems.map(b=>{
       const ri=DB.bids.indexOf(b);
       const isSole=b.계약유형==='수의계약';
       return`<div class="bid-mobile-card">
@@ -1860,6 +1887,15 @@ function renderBids(){
         </div>
       </div>`;
     }).join(''):`<div style="text-align:center;padding:32px 0;color:var(--text3);">데이터 없음<br><small>상단 "＋ 입찰 추가" 버튼으로 입력하세요</small></div>`;
+  }
+  const loadMoreBtn=document.getElementById('bids-load-more');
+  if(loadMoreBtn){
+    if(sorted.length>bidsVisibleCount){
+      loadMoreBtn.style.display='inline-flex';
+      loadMoreBtn.textContent=`더보기 (${Math.min(5,sorted.length-bidsVisibleCount)}개 추가)`;
+    }else{
+      loadMoreBtn.style.display='none';
+    }
   }
 }
 
@@ -2050,7 +2086,7 @@ function updateDataSummary(){
 // ════════════════════════════════
 //  FILTER LISTENERS (탭은 onclick으로 처리, 검색창만 여기서)
 // ════════════════════════════════
-document.getElementById('bid-search').addEventListener('input',renderBids);
+document.getElementById('bid-search').addEventListener('input',()=>{resetBidListVisible();renderBids();});
 document.getElementById('ct-search').addEventListener('input',renderContacts);
 
 // ════════════════════════════════
