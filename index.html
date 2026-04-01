@@ -457,7 +457,7 @@ textarea{resize:vertical;min-height:60px}
 <!-- ══ REVENUE ══ -->
 <div class="page" id="page-revenue">
   <div class="page-header">
-    <div class="page-header-left"><h2>💰 매출 실적</h2><p>연간 목표 대비 수주 실적 달성률 (수주 항목 계약금액 자동 집계)</p></div>
+    <div class="page-header-left"><h2>💰 매출 실적</h2><p>연간 목표 대비 수주 실적 달성률 (수주 항목 VAT 제외 계약금액 자동 집계)</p></div>
     <button class="btn btn-primary" onclick="openRevGoalForm()">🎯 연간 목표 설정</button>
   </div>
   <div class="controls">
@@ -474,7 +474,7 @@ textarea{resize:vertical;min-height:60px}
   </div>
 
   <div class="auto-note mb16">
-    📌 월별 실적은 수주/탈락 내역의 <strong>수주 건 계약금액</strong>을 <strong>입찰일 기준으로 자동 집계</strong>합니다. 수주 항목의 계약금액·입찰일을 입력하면 여기에 자동 반영됩니다.
+    📌 월별 실적은 수주/탈락 내역의 <strong>수주 건 VAT 제외 계약금액</strong>을 <strong>입찰일 기준으로 자동 집계</strong>합니다. 수주 항목의 계약금액·입찰일을 입력하면 여기에 자동 반영됩니다.
   </div>
 
   <div class="grid2 mb16">
@@ -1230,8 +1230,12 @@ function clearGhToken(){
 
 // ════════════════════════════════
 //  매출 자동 집계 헬퍼
-//  수주 건의 입찰일 기준 연/월로 계약금액 합산
+//  수주 건의 입찰일 기준 연/월로 VAT 제외 계약금액 합산
 // ════════════════════════════════
+function getBidNetAmount(b){
+  const amount=Number(b?.계약금액||0);
+  return amount>0?Math.round(amount/1.1):0;
+}
 function getBidActual(year, month){
   // month가 null이면 연간 합계
   return DB.bids
@@ -1243,7 +1247,7 @@ function getBidActual(year, month){
       if(month!==null&&month!==undefined){const m=parseInt(d.slice(5,7));return m===month;}
       return true;
     })
-    .reduce((s,b)=>s+(b.계약금액||0),0);
+    .reduce((s,b)=>s+getBidNetAmount(b),0);
 }
 
 function getBidActualItems(year, month){
@@ -1696,7 +1700,7 @@ function renderHome(){
   const cy=hy==='all'?now.getFullYear():parseInt(hy);
   const revRow=DB.revenue.find(r=>r.연도==cy);
   const yearActual=hy==='all'
-    ? DB.bids.filter(b=>b.결과==='수주'&&b.계약금액&&b.입찰일&&parseInt(b.입찰일.slice(0,4))===cy).reduce((s,b)=>s+(b.계약금액||0),0)
+    ? DB.bids.filter(b=>b.결과==='수주'&&b.계약금액&&b.입찰일&&parseInt(b.입찰일.slice(0,4))===cy).reduce((s,b)=>s+getBidNetAmount(b),0)
     : getBidActual(cy,null);
   if(revRow&&revRow.목표){
     const pct=yearActual/revRow.목표*100;
@@ -1976,7 +1980,7 @@ function renderRevenue(){
     const cumRate=annualGoal&&annualGoal>0?+(cumAct/annualGoal*100).toFixed(1):null;
     const items=getBidActualItems(revYear,m);
     const rb=cumRate===null?'—':cumRate>=Math.round(m/12*100)?`<span class="badge badge-success">${fmtPct(cumRate)}</span>`:`<span class="badge badge-warn">${fmtPct(cumRate)}</span>`;
-    const itemList=items.length?items.map(b=>`<span style="font-size:11px;background:var(--bg3);padding:2px 7px;border-radius:4px;margin:1px;display:inline-block;">${b.사업명}(${fmtMoney(b.계약금액)})</span>`).join(''):'—';
+    const itemList=items.length?items.map(b=>`<span style="font-size:11px;background:var(--bg3);padding:2px 7px;border-radius:4px;margin:1px;display:inline-block;">${b.사업명}(${fmtMoney(getBidNetAmount(b))})</span>`).join(''):'—';
     return`<tr>
       <td><strong>${m}월</strong></td>
       <td style="text-align:center;">${items.length?`<span class="badge badge-success">${items.length}건</span>`:'—'}</td>
