@@ -907,9 +907,29 @@
       "additional": 0,
       "total": 187,
       "rate": 41.1
+    },
+    {
+      "bidIdx": 17,
+      "사업명": "공공돌봄 정책개발 지역조사",
+      "입찰일": "2025-11-13",
+      "연도": "2025",
+      "contract": 1500,
+      "contractExVat": 1364,
+      "alloc": 1500,
+      "interview": 5,
+      "phone": 0,
+      "onlineFixed": 0,
+      "onlineGift": 0,
+      "onlineSms": 0,
+      "onlineSum": 0,
+      "extra": 495,
+      "indirect": 0,
+      "additional": 0,
+      "total": 500,
+      "rate": 36.66
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:59:15.490Z"
+    "lastUpdate": "2026-04-01T07:59:47.304Z"
   }
 }
