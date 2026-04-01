@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
-:root{--bg:#0f1117;--bg2:#181c27;--bg3:#1e2335;--card:#1a1f2e;--card2:#222840;--border:#2a3050;--border2:#3a4570;--accent:#4f7cff;--accent2:#7c5cff;--accent3:#00d4aa;--success:#22c55e;--danger:#ef4444;--warn:#f59e0b;--indigo:#6366f1;--pink:#ec4899;--text:#e8ecf4;--text2:#9ba5c0;--text3:#5a6480;--radius:12px;--radius2:8px}
+:root{--bg:#0f1117;--bg2:#181c27;--bg3:#1e2335;--card:#1a1f2e;--card2:#222840;--border:#2a3050;--border2:#3a4570;--accent:#4f7cff;--accent2:#7c5cff;--accent3:#00d4aa;--success:#22c55e;--danger:#ef4444;--warn:#f59e0b;--indigo:#6366f1;--pink:#ec4899;--text:#e8ecf4;--text2:#9ba5c0;--text3:#5a6480;--radius:12px;--radius2:8px;--bid-name-col-width:220px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 .app{display:flex;min-height:100vh}
@@ -123,6 +123,14 @@ textarea{resize:vertical;min-height:60px}
 .calc-result{background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.3);border-radius:var(--radius2);padding:10px 14px;font-size:13px;color:var(--accent3);font-weight:600}
 .no-data-note{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:var(--radius2);padding:10px 14px;font-size:12px;color:var(--indigo)}
 .auto-note{background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2);border-radius:var(--radius2);padding:8px 12px;font-size:12px;color:var(--accent3)}
+.yearly-cost-list{display:grid;gap:6px;margin-top:10px}
+.yearly-cost-item{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding-top:6px;border-top:1px solid rgba(42,48,80,.45)}
+.score-compare-list{display:grid;gap:12px}
+.score-compare-trigger{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;color:var(--text);text-align:left;cursor:pointer;transition:all .2s}
+.score-compare-trigger:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 8px 24px rgba(79,124,255,.12)}
+.score-compare-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;color:var(--text3);font-size:12px}
+.bid-name-col{width:var(--bid-name-col-width);min-width:var(--bid-name-col-width)}
+.bid-name-cell{max-width:var(--bid-name-col-width);min-width:var(--bid-name-col-width);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* PC/모바일 전용 표시 유틸리티 */
 .mobile-only{display:none}
 .pc-only{display:block}
@@ -213,6 +221,7 @@ textarea{resize:vertical;min-height:60px}
   .chart-container{height:180px}
   .chart-container.tall{height:220px}
   .summary-card{padding:14px}
+  .score-compare-trigger{padding:14px}
 
   /* 홈 최근 입찰 — 컬럼 일부 숨김 */
   #home-recent-tbody tr td:nth-child(3),
@@ -290,7 +299,7 @@ textarea{resize:vertical;min-height:60px}
   <div class="nav-item" data-page="revenue"><span class="nav-icon">💰</span><span>매출 실적</span></div>
   <div class="nav-item" data-page="contacts"><span class="nav-icon">📞</span><span>컨택 건수</span></div>
   <div class="nav-item" data-page="costs" onclick="tryOpenCosts(event)"><span class="nav-icon">📊</span><span>프로젝트별 비용률</span></div>
-  <div class="nav-item" data-page="data"><span class="nav-icon">⚙️</span><span>데이터 관리</span></div>
+  <div class="nav-item" data-page="data" onclick="tryOpenData(event)"><span class="nav-icon">⚙️</span><span>데이터 관리</span></div>
 </nav>
 
 <!-- 모바일 상단 헤더 -->
@@ -310,7 +319,7 @@ textarea{resize:vertical;min-height:60px}
     <button class="mobile-tab" data-page="revenue" onclick="goPage('revenue')"><span class="tab-icon">💰</span>매출</button>
     <button class="mobile-tab" data-page="contacts" onclick="goPage('contacts')"><span class="tab-icon">📞</span>컨택</button>
     <button class="mobile-tab" data-page="costs" onclick="tryOpenCosts()"><span class="tab-icon">📊</span>비용률</button>
-    <button class="mobile-tab" data-page="data" onclick="goPage('data')"><span class="tab-icon">⚙️</span>설정</button>
+    <button class="mobile-tab" data-page="data" onclick="tryOpenData()"><span class="tab-icon">⚙️</span>설정</button>
   </div>
 </div>
 
@@ -327,12 +336,13 @@ textarea{resize:vertical;min-height:60px}
       <button class="tab-btn active" onclick="setHomeYear('all',this)">전체</button>
     </div>
   </div>
-  <div class="grid5 mb16">
+  <div class="grid3 mb16">
     <div class="stat-card blue"><div class="stat-label">총 프로젝트</div><div class="stat-value" id="h-total">0</div><div class="stat-sub">경쟁 <strong id="h-comp">0</strong> · 수의 <strong id="h-sole">0</strong></div></div>
     <div class="stat-card green"><div class="stat-label">수주 건수</div><div class="stat-value" id="h-win">0</div><div class="stat-sub">수주율(경쟁) <strong id="h-rate">—</strong></div></div>
     <div class="stat-card red"><div class="stat-label">탈락 건수</div><div class="stat-value" id="h-lose">0</div><div class="stat-sub">경쟁입찰 기준</div></div>
     <div class="stat-card pink"><div class="stat-label">컨택 건수</div><div class="stat-value" id="h-contact">0</div><div class="stat-sub">잠재 고객사</div></div>
     <div class="stat-card warn"><div class="stat-label">올해 달성률</div><div class="stat-value" id="h-achieve">—</div><div class="stat-sub" id="h-achieve-sub">연간 목표 대비</div></div>
+    <div class="stat-card indigo"><div class="stat-label">연도별 평균 비용률</div><div class="stat-value" id="h-cost-rate">—</div><div class="stat-sub" id="h-cost-rate-sub">비용률 데이터 없음</div><div class="yearly-cost-list" id="h-cost-year-list"></div></div>
   </div>
   <div class="grid2 mb16">
     <div class="card">
@@ -409,9 +419,16 @@ textarea{resize:vertical;min-height:60px}
     <div class="card"><div class="card-title">사업분야별 수주 비중</div><div class="chart-container"><canvas id="bid-field-chart"></canvas></div></div>
   </div>
   <div class="card">
-    <div class="card-title">입찰 목록</div>
+    <div class="flex justify-between items-center gap12" style="flex-wrap:wrap;margin-bottom:14px;">
+      <div class="card-title" style="margin-bottom:0;">입찰 목록</div>
+      <label class="text-sm text-muted" style="display:flex;align-items:center;gap:8px;">
+        사업명 너비
+        <input type="range" id="bid-name-width-range" min="160" max="420" step="10" value="220" oninput="setBidNameColWidth(this.value)">
+        <strong id="bid-name-width-value" style="color:var(--text);min-width:52px;">220px</strong>
+      </label>
+    </div>
     <!-- PC: 테이블 -->
-    <div class="table-wrap pc-only"><table><thead><tr><th>연도</th><th>입찰일</th><th>사업명</th><th>발주처</th><th>분야</th><th>유형</th><th>계약금액</th><th>기술평가</th><th>가격점수</th><th>경쟁사</th><th>낙찰사</th><th>결과</th><th>비용률</th><th>관리</th></tr></thead><tbody id="bids-tbody"></tbody></table></div>
+    <div class="table-wrap pc-only"><table><thead><tr><th>연도</th><th>입찰일</th><th class="bid-name-col">사업명</th><th>발주처</th><th>분야</th><th>유형</th><th>계약금액</th><th>기술평가</th><th>가격점수</th><th>경쟁사</th><th>낙찰사</th><th>결과</th><th>비용률</th><th>관리</th></tr></thead><tbody id="bids-tbody"></tbody></table></div>
     <!-- 모바일: 카드형 -->
     <div class="mobile-only" id="bids-cards"></div>
   </div>
@@ -433,7 +450,8 @@ textarea{resize:vertical;min-height:60px}
   <div class="section-title">경쟁사별 누적 집계</div>
   <div class="card mb16"><div class="table-wrap"><table><thead><tr><th>경쟁사명</th><th>대결 횟수</th><th>우리 수주</th><th>경쟁사 낙찰</th><th>낙찰률</th></tr></thead><tbody id="comp-summary-tbody"></tbody></table></div></div>
   <div class="section-title">입찰건별 점수 비교</div>
-  <div id="comp-detail-list"></div>
+  <div class="auto-note mb16">프로젝트명과 수주/탈락 상태를 눌러 점수 비교 팝업을 열 수 있습니다.</div>
+  <div class="score-compare-list" id="comp-detail-list"></div>
 </div>
 
 <!-- ══ REVENUE ══ -->
@@ -564,7 +582,7 @@ textarea{resize:vertical;min-height:60px}
 
 <!-- ══ DATA ══ -->
 <div class="page" id="page-data">
-  <div class="page-header"><div class="page-header-left"><h2>⚙️ 데이터 관리</h2><p>GitHub 자동 저장 · CSV 업로드 · 백업</p></div></div>
+  <div class="page-header"><div class="page-header-left"><h2>⚙️ 데이터 관리</h2><p>GitHub 자동 저장 · CSV 업로드 · 백업</p></div><button class="btn btn-outline" onclick="openDataPwChange()">🔒 비밀번호 변경</button></div>
 
   <!-- GitHub 연동 설정 -->
   <div class="section-title">🔗 GitHub 자동 저장 설정</div>
@@ -640,6 +658,47 @@ textarea{resize:vertical;min-height:60px}
   <div class="modal-footer">
     <button class="btn btn-outline" onclick="closeModal('cost-pw-modal')">취소</button>
     <button class="btn btn-primary" onclick="verifyCostPw()">확인</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODAL: 데이터 관리 탭 비밀번호 ══ -->
+<div class="modal-overlay hidden" id="data-pw-modal">
+<div class="modal modal-sm">
+  <h3><span>🔒 비밀번호 입력</span><button class="modal-close" onclick="closeModal('data-pw-modal')">✕</button></h3>
+  <p class="text-sm text-muted mb16">데이터 관리 탭은 비밀번호로 보호되어 있습니다.</p>
+  <div class="form-group">
+    <label class="form-label">비밀번호</label>
+    <input type="password" id="data-pw-input" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')verifyDataPw()">
+  </div>
+  <div id="data-pw-error" style="color:var(--danger);font-size:12px;margin-top:-8px;margin-bottom:8px;display:none;">비밀번호가 틀렸습니다.</div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('data-pw-modal')">취소</button>
+    <button class="btn btn-primary" onclick="verifyDataPw()">확인</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODAL: 데이터 관리 비밀번호 변경 ══ -->
+<div class="modal-overlay hidden" id="data-pw-change-modal">
+<div class="modal modal-sm">
+  <h3><span>🔒 비밀번호 변경</span><button class="modal-close" onclick="closeModal('data-pw-change-modal')">✕</button></h3>
+  <div class="form-group">
+    <label class="form-label">현재 비밀번호</label>
+    <input type="password" id="data-pw-old" placeholder="현재 비밀번호">
+  </div>
+  <div class="form-group">
+    <label class="form-label">새 비밀번호</label>
+    <input type="password" id="data-pw-new" placeholder="새 비밀번호">
+  </div>
+  <div class="form-group">
+    <label class="form-label">새 비밀번호 확인</label>
+    <input type="password" id="data-pw-new2" placeholder="새 비밀번호 재입력">
+  </div>
+  <div id="data-pw-change-error" style="color:var(--danger);font-size:12px;margin-bottom:8px;display:none;"></div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('data-pw-change-modal')">취소</button>
+    <button class="btn btn-primary" onclick="changeDataPw()">변경</button>
   </div>
 </div>
 </div>
@@ -816,6 +875,14 @@ textarea{resize:vertical;min-height:60px}
 </div>
 </div>
 
+<!-- ══ MODAL: 경쟁사 점수 비교 ══ -->
+<div class="modal-overlay hidden" id="comp-score-modal">
+<div class="modal">
+  <h3><span id="comp-score-modal-title">입찰건별 점수 비교</span><button class="modal-close" onclick="closeModal('comp-score-modal')">✕</button></h3>
+  <div id="comp-score-modal-body"></div>
+</div>
+</div>
+
 <!-- ══ MODAL: 입찰 상세 ══ -->
 <div class="modal-overlay hidden" id="bid-detail-modal">
 <div class="modal">
@@ -875,6 +942,11 @@ const MAX_COMP=10;
 const COST_PW_KEY='cost_pw';
 const COST_PW_DEFAULT='1234';
 function getCostPw(){return localStorage.getItem(COST_PW_KEY)||COST_PW_DEFAULT;}
+const DATA_PW_KEY='data_pw';
+const DATA_PW_DEFAULT='1234';
+const BID_NAME_WIDTH_KEY='bid_name_col_width';
+function getDataPw(){return localStorage.getItem(DATA_PW_KEY)||DATA_PW_DEFAULT;}
+function getBidNameColWidth(){return parseInt(localStorage.getItem(BID_NAME_WIDTH_KEY)||'220',10);}
 
 // 탭 필터 상태
 const BF={year:'all',field:'all',type:'all',result:'all'};
@@ -926,8 +998,8 @@ function goPage(n){
   renderPage(n);
 }
 document.querySelectorAll('.nav-item').forEach(el=>{
-  // costs 탭은 별도 처리 (onclick 속성에서 처리)
-  if(el.dataset.page!=='costs') el.addEventListener('click',()=>goPage(el.dataset.page));
+  // 보호 탭은 별도 처리 (onclick 속성에서 처리)
+  if(!['costs','data'].includes(el.dataset.page)) el.addEventListener('click',()=>goPage(el.dataset.page));
 });
 
 // ── 비용률 탭 비밀번호 보호 ──
@@ -965,6 +1037,42 @@ function changeCostPw(){
   localStorage.setItem(COST_PW_KEY,nw);
   closeModal('cost-pw-change-modal');
   showToast('비밀번호가 변경되었습니다.','success');
+}
+
+function tryOpenData(e){
+  if(e&&e.stopPropagation)e.stopPropagation();
+  if(sessionStorage.getItem('data_auth')==='1'){goPage('data');return;}
+  document.getElementById('data-pw-input').value='';
+  document.getElementById('data-pw-error').style.display='none';
+  openModal('data-pw-modal');
+}
+function verifyDataPw(){
+  const input=document.getElementById('data-pw-input').value;
+  if(input===getDataPw()){
+    sessionStorage.setItem('data_auth','1');
+    closeModal('data-pw-modal');
+    goPage('data');
+  }else{
+    document.getElementById('data-pw-error').style.display='block';
+    document.getElementById('data-pw-input').value='';
+  }
+}
+function openDataPwChange(){
+  ['data-pw-old','data-pw-new','data-pw-new2'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('data-pw-change-error').style.display='none';
+  openModal('data-pw-change-modal');
+}
+function changeDataPw(){
+  const old=document.getElementById('data-pw-old').value;
+  const nw=document.getElementById('data-pw-new').value;
+  const nw2=document.getElementById('data-pw-new2').value;
+  const errEl=document.getElementById('data-pw-change-error');
+  if(old!==getDataPw()){errEl.textContent='현재 비밀번호가 틀렸습니다.';errEl.style.display='block';return;}
+  if(!nw){errEl.textContent='새 비밀번호를 입력하세요.';errEl.style.display='block';return;}
+  if(nw!==nw2){errEl.textContent='새 비밀번호가 일치하지 않습니다.';errEl.style.display='block';return;}
+  localStorage.setItem(DATA_PW_KEY,nw);
+  closeModal('data-pw-change-modal');
+  showToast('데이터 관리 비밀번호가 변경되었습니다.','success');
 }
 
 // ════════════════════════════════
@@ -1252,7 +1360,18 @@ function fmtMoney(v){return(v===null||v===undefined||v==='')?'—':Number(v).toL
 function fmtScore(v){return(v===null||v===undefined||v==='')?'—':Number(v).toFixed(2);}
 function fmtPct(v){return(v===null||isNaN(v))?'—':v.toFixed(1)+'%';}
 function resultBadge(r){if(r==='수주')return`<span class="badge badge-success">수주</span>`;if(r==='탈락')return`<span class="badge badge-danger">탈락</span>`;return`<span class="badge badge-warn">${r||'입찰중'}</span>`;}
-function typeBadge(t){return t==='수의계약'?`<span class="badge badge-indigo">수의</span>`:`<span class="badge badge-blue">경쟁</span>`;}
+function typeBadge(t){return t==='수의계약'?`<span class="badge badge-danger">수의</span>`:`<span class="badge badge-blue">경쟁</span>`;}
+function getFieldColor(field){
+  const palette=[C.blue,C.purple,C.teal,C.warn,C.green,C.pink,C.indigo];
+  const fields=getFields();
+  const idx=fields.indexOf(field);
+  return palette[(idx===-1?0:idx)%palette.length];
+}
+function fieldBadge(field,small=false){
+  const label=field||'—';
+  const color=field?getFieldColor(field):C.blue;
+  return `<span class="badge" style="background:${color}26;color:${color};${small?'font-size:10px;':''}">${label}</span>`;
+}
 function winnerBadge(낙찰사,결과){if(!낙찰사&&결과!=='수주')return'<span style="color:var(--text3);font-size:11px;">—</span>';if(낙찰사==='우리팀')return`<span class="winner-chip">🏆 우리팀</span>`;return`<span class="winner-chip" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.3);">${낙찰사}</span>`;}
 function statusBadge(s){const m={검토중:'badge-blue',제안예정:'badge-warn',제안완료:'badge-purple',무산:'badge-danger',수주연결:'badge-success'};return`<span class="badge ${m[s]||'badge-blue'}">${s||'검토중'}</span>`;}
 
@@ -1270,6 +1389,42 @@ function mkChart(id,type,data,opts){dk(id);const el=document.getElementById(id);
 function closeModal(id){document.getElementById(id).classList.add('hidden');}
 function openModal(id){document.getElementById(id).classList.remove('hidden');}
 document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.add('hidden');}));
+function setBidNameColWidth(value){
+  const width=Math.max(160,Math.min(420,parseInt(value,10)||220));
+  document.documentElement.style.setProperty('--bid-name-col-width',width+'px');
+  const range=document.getElementById('bid-name-width-range');
+  const valueEl=document.getElementById('bid-name-width-value');
+  if(range&&String(range.value)!==String(width))range.value=width;
+  if(valueEl)valueEl.textContent=width+'px';
+  localStorage.setItem(BID_NAME_WIDTH_KEY,String(width));
+}
+function buildCompetitorScoreDetail(b){
+  const pal=['#ef4444','#f59e0b','#8b5cf6','#06b6d4','#84cc16'];
+  const cwp=calcCompPrices(b).slice().sort((a,b2)=>((b2.기술||0)+(b2.가격||0))-((a.기술||0)+(a.가격||0)));
+  const bars=['기술평가','가격점수'].map((label,li)=>{
+    const ourKey=li===0?'우리기술':'우리가격';
+    const compKey=li===0?'기술':'가격';
+    const all=[b[ourKey],...cwp.map(c=>c[compKey])].filter(v=>v!==null);
+    const mx=Math.max(...all,1);
+    if(!all.length)return '';
+    return `<div><div style="font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:600;">${label}</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><div style="width:66px;font-size:10px;color:var(--accent);text-align:right;flex-shrink:0;">우리팀</div><div class="score-bar-track" style="flex:1;height:10px;"><div class="score-bar-fill" style="width:${b[ourKey]!==null?b[ourKey]/mx*100:0}%;background:#4f7cff;"></div></div><div style="width:32px;font-size:10px;text-align:right;">${fmtScore(b[ourKey])}</div></div>
+      ${cwp.map((c,ci)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><div style="width:66px;font-size:10px;color:${pal[ci%pal.length]};text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${c.name}">${c.name}</div><div class="score-bar-track" style="flex:1;height:10px;"><div class="score-bar-fill" style="width:${c[compKey]!==null?c[compKey]/mx*100:0}%;background:${pal[ci%pal.length]};"></div></div><div style="width:32px;font-size:10px;text-align:right;">${fmtScore(c[compKey])}</div></div>`).join('')}
+    </div>`;
+  }).join('');
+  const priceCards=cwp.filter(c=>c.추정제안가!==null).map(c=>{
+    const isW=b.낙찰사===c.name;
+    return `<div class="calc-result" style="font-size:12px;${isW?'border-color:rgba(239,68,68,.4);color:#ef4444;background:rgba(239,68,68,.06);':''}">🎯 ${c.name}: <strong>${fmtMoney(c.추정제안가)}</strong>${isW?' (낙찰)':''}</div>`;
+  }).join('');
+  return `<div class="mb16"><div style="font-size:14px;font-weight:700;">${b.사업명}</div><div class="score-compare-meta">${b.입찰일||''} · ${b.발주처||''} · ${fieldBadge(b.사업분야)} · 참여사 ${b.competitors.length+1}개</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">${winnerBadge(b.낙찰사,b.결과)}${resultBadge(b.결과)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">${bars}</div><div class="flex gap8" style="flex-wrap:wrap;"><div style="background:var(--bg3);border-radius:6px;padding:7px 12px;font-size:12px;">💰 우리 제안가: <strong>${fmtMoney(b.우리제안가)}</strong></div>${priceCards}</div>`;
+}
+function openCompScoreModal(idx){
+  const b=DB.bids[idx];
+  if(!b)return;
+  document.getElementById('comp-score-modal-title').textContent=`${b.사업명} 점수 비교`;
+  document.getElementById('comp-score-modal-body').innerHTML=buildCompetitorScoreDetail(b);
+  openModal('comp-score-modal');
+}
 
 // ════════════════════════════════
 //  BID FORM
@@ -1482,6 +1637,27 @@ function renderHome(){
   document.getElementById('h-sole-win').textContent=sole.filter(b=>b.결과==='수주').length;
   document.getElementById('h-type-bar').style.width=(bids.length>0?comp.length/bids.length*100:0)+'%';
 
+  const yearlyCostRows=DB.costs.reduce((acc,c)=>{
+    const year=c.연도||'미지정';
+    if(c.rate===null||c.rate===undefined)return acc;
+    if(!acc[year])acc[year]=[];
+    acc[year].push(c.rate);
+    return acc;
+  },{});
+  const yearlyCostAvg=Object.entries(yearlyCostRows)
+    .map(([year,rates])=>({year,avg:rates.reduce((sum,v)=>sum+v,0)/rates.length,count:rates.length}))
+    .sort((a,b)=>String(a.year).localeCompare(String(b.year)));
+  const selectedCostAvg=hy==='all'
+    ? (yearlyCostAvg.length?yearlyCostAvg.reduce((sum,row)=>sum+row.avg,0)/yearlyCostAvg.length:null)
+    : (yearlyCostAvg.find(row=>String(row.year)===String(hy))?.avg ?? null);
+  document.getElementById('h-cost-rate').textContent=fmtPct(selectedCostAvg);
+  document.getElementById('h-cost-rate-sub').textContent=hy==='all'
+    ? (yearlyCostAvg.length?'등록 연도 평균 요약':'비용률 데이터 없음')
+    : `${hy}년 평균 비용률`;
+  document.getElementById('h-cost-year-list').innerHTML=yearlyCostAvg.length
+    ? yearlyCostAvg.map(row=>`<div class="yearly-cost-item"><span>${row.year}년</span><strong>${fmtPct(row.avg)}</strong></div>`).join('')
+    : '<div class="text-sm text-muted">비용률 데이터 없음</div>';
+
   // 달성률: 특정 연도 선택 시 해당 연도, 전체 시 올해 기준
   const cy=hy==='all'?now.getFullYear():parseInt(hy);
   const revRow=DB.revenue.find(r=>r.연도==cy);
@@ -1547,7 +1723,7 @@ function renderHome(){
   // 최근 입찰 5건 (필터 적용)
   const recent=[...bids].sort((a,b)=>(b.입찰일||'').localeCompare(a.입찰일||'')).slice(0,5);
   document.getElementById('home-recent-tbody').innerHTML=recent.length
-    ?recent.map(b=>`<tr><td>${b.입찰일||'—'}</td><td style="max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.사업명}</td><td>${b.발주처||'—'}</td><td><span class="badge badge-blue">${b.사업분야||'—'}</span></td><td>${typeBadge(b.계약유형)}</td><td style="text-align:center;">${b.계약유형==='경쟁입찰'?b.competitors.length:'—'}</td><td>${winnerBadge(b.낙찰사,b.결과)}</td><td>${resultBadge(b.결과)}</td></tr>`).join('')
+    ?recent.map(b=>`<tr><td>${b.입찰일||'—'}</td><td style="max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.사업명}</td><td>${b.발주처||'—'}</td><td>${fieldBadge(b.사업분야)}</td><td>${typeBadge(b.계약유형)}</td><td style="text-align:center;">${b.계약유형==='경쟁입찰'?b.competitors.length:'—'}</td><td>${winnerBadge(b.낙찰사,b.결과)}</td><td>${resultBadge(b.결과)}</td></tr>`).join('')
     :`<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3);">데이터 없음</td></tr>`;
 }
 
@@ -1579,10 +1755,10 @@ function renderBids(){
   const wonBids=allB.filter(b=>b.결과==='수주');
   const fields=[...new Set(wonBids.map(b=>b.사업분야).filter(Boolean))];
   if(fields.length){
-    const pal=[C.blue,C.purple,C.teal,C.warn,C.green,C.pink,C.indigo];
+    const fieldColors=fields.map(f=>getFieldColor(f));
     mkChart('bid-field-chart','doughnut',{
       labels:fields,
-      datasets:[{data:fields.map(f=>wonBids.filter(b=>b.사업분야===f).length),backgroundColor:fields.map((_,i)=>pal[i%pal.length]+'cc'),borderColor:fields.map((_,i)=>pal[i%pal.length]),borderWidth:2}]
+      datasets:[{data:fields.map(f=>wonBids.filter(b=>b.사업분야===f).length),backgroundColor:fieldColors.map(color=>color+'cc'),borderColor:fieldColors,borderWidth:2}]
     },{plugins:{legend:{position:'right',labels:{color:'#9ba5c0',font:{family:'Pretendard'},padding:10}}}});
   }else dk('bid-field-chart');
 
@@ -1596,9 +1772,9 @@ function renderBids(){
       :`<span style="color:var(--text3);font-size:11px;">—</span>`;
     return`<tr>
     <td>${b.연도||'—'}</td><td>${b.입찰일||'—'}</td>
-    <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${b.사업명}">${b.사업명}</td>
+    <td class="bid-name-cell" title="${b.사업명}">${b.사업명}</td>
     <td>${b.발주처||'—'}</td>
-    <td><span class="badge badge-blue">${b.사업분야||'—'}</span></td>
+    <td>${fieldBadge(b.사업분야)}</td>
     <td>${typeBadge(b.계약유형)}</td>
     <td>${b.결과==='수주'?fmtMoney(b.계약금액):'—'}</td>
     <td>${sc(b,b.우리기술)}</td><td>${sc(b,b.우리가격)}</td>
@@ -1628,7 +1804,7 @@ function renderBids(){
           <span>${b.입찰일||'—'}</span>
           <span>·</span>
           <span>${b.발주처||'—'}</span>
-          ${b.사업분야?`<span>·</span><span class="badge badge-blue" style="font-size:10px;">${b.사업분야}</span>`:''}
+          ${b.사업분야?`<span>·</span>${fieldBadge(b.사업분야,true)}`:''}
         </div>
         <div class="bid-mobile-card-meta">
           <span>계약금액: <strong style="color:var(--success);">${b.결과==='수주'?fmtMoney(b.계약금액):'—'}</strong></span>
@@ -1705,23 +1881,11 @@ function renderCompetitor(){
   const data=DB.bids.filter(b=>{if(b.계약유형!=='경쟁입찰')return false;if(yF!=='all'&&b.연도!=yF)return false;if(cF!=='all'&&!b.competitors.some(c=>c.name===cF))return false;return true;});
   const compMap={};
   data.forEach(b=>b.competitors.forEach(c=>{if(!c.name)return;if(!compMap[c.name])compMap[c.name]={total:0,ourWin:0,compWin:0,techs:[],prices:[]};const m=compMap[c.name];m.total++;if(b.결과==='수주')m.ourWin++;if(b.낙찰사===c.name)m.compWin++;if(c.기술!==null)m.techs.push(c.기술);if(c.가격!==null)m.prices.push(c.가격);}));
-  const avgArr=arr=>arr.length?(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2):'—';
   document.getElementById('comp-summary-tbody').innerHTML=Object.entries(compMap).sort((a,b)=>b[1].total-a[1].total).map(([name,d])=>`<tr><td><strong>${name}</strong></td><td>${d.total}</td><td><span class="badge badge-success">${d.ourWin}</span></td><td><span class="badge badge-danger">${d.compWin}</span></td><td>${d.total>0?(d.compWin/d.total*100).toFixed(1)+'%':'—'}</td></tr>`).join('')||`<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3);">경쟁사 데이터 없음</td></tr>`;
-  const pal=['#ef4444','#f59e0b','#8b5cf6','#06b6d4','#84cc16'];
   const sorted=[...data].filter(b=>b.competitors.length>0).sort((a,b)=>(b.입찰일||'').localeCompare(a.입찰일||''));
   document.getElementById('comp-detail-list').innerHTML=sorted.length?sorted.map(b=>{
-    // 경쟁사를 기술+가격 합계 내림차순 정렬 (우리팀은 별도 고정)
-    const cwp=calcCompPrices(b).slice().sort((a,b2)=>((b2.기술||0)+(b2.가격||0))-((a.기술||0)+(a.가격||0)));
-    const bars=['기술평가','가격점수'].map((label,li)=>{
-      const ourKey=li===0?'우리기술':'우리가격';const compKey=li===0?'기술':'가격';
-      const all=[b[ourKey],...cwp.map(c=>c[compKey])].filter(v=>v!==null);const mx=Math.max(...all,1);
-      if(!all.length)return'';
-      return`<div><div style="font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:600;">${label}</div>
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><div style="width:66px;font-size:10px;color:var(--accent);text-align:right;flex-shrink:0;">우리팀</div><div class="score-bar-track" style="flex:1;height:10px;"><div class="score-bar-fill" style="width:${b[ourKey]!==null?b[ourKey]/mx*100:0}%;background:#4f7cff;"></div></div><div style="width:26px;font-size:10px;text-align:right;">${fmtScore(b[ourKey])}</div></div>
-      ${cwp.map((c,ci)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><div style="width:66px;font-size:10px;color:${pal[ci%pal.length]};text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${c.name}">${c.name}</div><div class="score-bar-track" style="flex:1;height:10px;"><div class="score-bar-fill" style="width:${c[compKey]!==null?c[compKey]/mx*100:0}%;background:${pal[ci%pal.length]};"></div></div><div style="width:26px;font-size:10px;text-align:right;">${fmtScore(c[compKey])}</div></div>`).join('')}
-      </div>`;
-    }).join('');
-    return`<div class="card mb16"><div class="flex justify-between items-center mb16"><div><div style="font-size:14px;font-weight:700;">${b.사업명}</div><div class="text-sm text-muted">${b.입찰일||''} · ${b.발주처||''} · <span class="badge badge-blue">${b.사업분야||''}</span> · 참여사 ${b.competitors.length+1}개</div></div><div style="display:flex;gap:6px;">${winnerBadge(b.낙찰사,b.결과)}${resultBadge(b.결과)}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">${bars}</div><div class="flex gap8" style="flex-wrap:wrap;"><div style="background:var(--bg3);border-radius:6px;padding:7px 12px;font-size:12px;">💰 우리 제안가: <strong>${fmtMoney(b.우리제안가)}</strong></div>${cwp.filter(c=>c.추정제안가!==null).map(c=>{const isW=b.낙찰사===c.name;return`<div class="calc-result" style="font-size:12px;${isW?'border-color:rgba(239,68,68,.4);color:#ef4444;background:rgba(239,68,68,.06);':''}">🎯 ${c.name}: <strong>${fmtMoney(c.추정제안가)}</strong>${isW?' (낙찰)':''}</div>`;}).join('')}</div></div>`;
+    const idx=DB.bids.indexOf(b);
+    return `<button type="button" class="score-compare-trigger" onclick="openCompScoreModal(${idx})"><div class="flex justify-between items-center gap12" style="flex-wrap:wrap;"><div><div style="font-size:14px;font-weight:700;">${b.사업명}</div><div class="score-compare-meta">${b.입찰일||''} · ${b.발주처||''} · ${fieldBadge(b.사업분야)} · 참여사 ${b.competitors.length+1}개</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">${resultBadge(b.결과)}${winnerBadge(b.낙찰사,b.결과)}</div></div></button>`;
   }).join(''):`<div class="empty"><div class="empty-icon">📭</div><p>표시할 경쟁사 데이터가 없습니다.</p></div>`;
 }
 
@@ -2007,7 +2171,7 @@ function renderCosts(){
 }
 
 function renderPage(n){if(n==='home')renderHome();else if(n==='bids')renderBids();else if(n==='competitor')renderCompetitor();else if(n==='revenue')renderRevenue();else if(n==='contacts')renderContacts();else if(n==='costs')renderCosts();else if(n==='data')updateDataSummary();}
-(async()=>{loadLS();await loadDataJSON();refreshFilters();renderPage('home');updateDataSummary();})();
+(async()=>{setBidNameColWidth(getBidNameColWidth());loadLS();await loadDataJSON();refreshFilters();renderPage('home');updateDataSummary();})();
 </script>
 </body>
 </html>
