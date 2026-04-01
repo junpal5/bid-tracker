@@ -767,9 +767,29 @@
       "additional": 0,
       "total": 539,
       "rate": 28.23
+    },
+    {
+      "bidIdx": 10,
+      "사업명": "영등포구 1인가구 정책연구회",
+      "입찰일": "2025-06-18",
+      "연도": "2025",
+      "contract": 1500,
+      "contractExVat": 1364,
+      "alloc": 1500,
+      "interview": 418,
+      "phone": 0,
+      "onlineFixed": 10,
+      "onlineGift": 7,
+      "onlineSms": 5,
+      "onlineSum": 22,
+      "extra": 366,
+      "indirect": 0,
+      "additional": 0,
+      "total": 806,
+      "rate": 59.09
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:55:54.691Z"
+    "lastUpdate": "2026-04-01T07:56:28.296Z"
   }
 }
