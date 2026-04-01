@@ -847,9 +847,29 @@
       "additional": 0,
       "total": 136,
       "rate": 15.74
+    },
+    {
+      "bidIdx": 14,
+      "사업명": "통영시 민선8기 3년 시정 평가 및 시정중점 추진분야 여론조사",
+      "입찰일": "2025-08-26",
+      "연도": "2025",
+      "contract": 770,
+      "contractExVat": 700,
+      "alloc": 770,
+      "interview": 0.5,
+      "phone": 0,
+      "onlineFixed": 0,
+      "onlineGift": 0,
+      "onlineSms": 0,
+      "onlineSum": 0,
+      "extra": 251,
+      "indirect": 0,
+      "additional": 0,
+      "total": 251.5,
+      "rate": 35.93
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:58:05.691Z"
+    "lastUpdate": "2026-04-01T07:58:29.044Z"
   }
 }
