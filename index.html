@@ -510,19 +510,62 @@ textarea{resize:vertical;min-height:60px}
 
 <!-- ══ DATA ══ -->
 <div class="page" id="page-data">
-  <div class="page-header"><div class="page-header-left"><h2>⚙️ 데이터 관리</h2><p>CSV 업로드·다운로드, JSON 내보내기/불러오기</p></div></div>
+  <div class="page-header"><div class="page-header-left"><h2>⚙️ 데이터 관리</h2><p>GitHub 자동 저장 · CSV 업로드 · 백업</p></div></div>
+
+  <!-- GitHub 연동 설정 -->
+  <div class="section-title">🔗 GitHub 자동 저장 설정</div>
+  <div class="card mb16">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:14px;font-weight:700;">GitHub 연동 상태</div>
+        <div id="gh-sync-status" class="mt16"></div>
+      </div>
+      <div style="text-align:right;">
+        <div class="text-sm text-muted">저장소</div>
+        <div style="font-size:13px;font-weight:600;">junpal5/bid-tracker</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="form-group">
+      <label class="form-label">현재 토큰 상태</label>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <code id="gh-token-display" style="background:var(--bg3);padding:6px 12px;border-radius:6px;font-size:13px;flex:1;min-width:0;">확인 중...</code>
+        <button class="btn btn-danger btn-sm" onclick="clearGhToken()">토큰 삭제</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">새 토큰 입력 <span style="color:var(--text3);font-weight:400;">(변경 시에만 입력)</span></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="password" id="gh-token-input" placeholder="ghp_..." style="flex:1;min-width:0;">
+        <button class="btn btn-primary" onclick="saveGhToken()">저장</button>
+      </div>
+    </div>
+    <div class="auto-note">
+      💡 토큰을 설정하면 입찰 추가·수정·삭제 시 <strong>자동으로 GitHub에 저장</strong>됩니다. 토큰은 이 기기의 브라우저에만 저장되며 GitHub에 업로드되지 않습니다.
+    </div>
+  </div>
+
+  <!-- CSV 업로드 -->
   <div class="section-title">CSV 업로드 (일괄 등록)</div>
   <div class="grid2 mb16">
     <div class="card"><div class="card-title">입찰 내역 CSV</div><div class="upload-zone" id="bid-upload-zone" onclick="document.getElementById('bid-csv-input').click()"><div class="upload-icon">📂</div><div class="upload-text">클릭 또는 드래그</div><div class="upload-sub">bids_template.csv</div></div><input type="file" id="bid-csv-input" accept=".csv" style="display:none;" onchange="handleCSV(event,'bids')"><div class="flex gap8 mt16"><button class="btn btn-outline btn-sm" onclick="downloadTemplate('bids')">📥 템플릿</button><button class="btn btn-danger btn-sm" onclick="clearData('bids')">🗑 초기화</button></div><div id="bid-upload-status" class="text-sm text-muted mt16"></div></div>
     <div class="card"><div class="card-title">컨택 내역 CSV</div><div class="upload-zone" id="ct-upload-zone" onclick="document.getElementById('ct-csv-input').click()"><div class="upload-icon">📂</div><div class="upload-text">클릭 또는 드래그</div><div class="upload-sub">contacts_template.csv</div></div><input type="file" id="ct-csv-input" accept=".csv" style="display:none;" onchange="handleCSV(event,'contacts')"><div class="flex gap8 mt16"><button class="btn btn-outline btn-sm" onclick="downloadTemplate('contacts')">📥 템플릿</button><button class="btn btn-danger btn-sm" onclick="clearData('contacts')">🗑 초기화</button></div><div id="ct-upload-status" class="text-sm text-muted mt16"></div></div>
   </div>
   <div class="auto-note mb16">📌 매출 실적 CSV는 더 이상 필요하지 않습니다. 수주/탈락 내역의 수주 건 계약금액이 자동 집계됩니다. 연간 목표 매출은 매출 실적 탭의 "🎯 연간 목표 설정" 버튼으로 입력하세요.</div>
-  <div class="section-title">JSON 내보내기 / 불러오기 (Netlify 배포용)</div>
+
+  <!-- 백업 -->
+  <div class="section-title">백업 / 복원</div>
   <div class="card mb16">
-    <p class="text-sm text-muted mb16">💡 <strong style="color:var(--text)">사용 방법:</strong> 데이터 입력 후 JSON 내보내기 → <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;">index.html</code>과 <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;">data.json</code>을 같은 폴더에 두고 Netlify에 업로드하면 모든 접속자가 동일한 데이터를 확인합니다.</p>
-    <div class="flex gap8" style="flex-wrap:wrap;"><button class="btn btn-primary" onclick="exportJSON()">📤 JSON 내보내기 (data.json)</button><div class="upload-zone" style="padding:10px 20px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;" onclick="document.getElementById('json-import-input').click()"><span>📥 JSON 불러오기</span></div><input type="file" id="json-import-input" accept=".json" style="display:none;" onchange="importJSON(event)"></div>
+    <p class="text-sm text-muted mb16">📦 로컬 백업용 JSON 다운로드 또는 이전 백업 파일 복원에 사용합니다.</p>
+    <div class="flex gap8" style="flex-wrap:wrap;">
+      <button class="btn btn-outline" onclick="exportJSON()">📤 JSON 백업 다운로드</button>
+      <div class="upload-zone" style="padding:10px 20px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;" onclick="document.getElementById('json-import-input').click()"><span>📥 JSON 복원</span></div>
+      <input type="file" id="json-import-input" accept=".json" style="display:none;" onchange="importJSON(event)">
+    </div>
     <div id="json-status" class="text-sm text-muted mt16"></div>
   </div>
+
+  <!-- 현황 -->
   <div class="section-title">현재 데이터 현황</div>
   <div class="grid4"><div class="card"><div class="card-title">입찰 내역</div><div class="stat-value" id="data-bid-count" style="font-size:28px;margin-top:8px;">0</div><div class="text-sm text-muted mt16">건</div></div><div class="card"><div class="card-title">연간 목표 설정</div><div class="stat-value" id="data-rev-count" style="font-size:28px;margin-top:8px;">0</div><div class="text-sm text-muted mt16">개 연도</div></div><div class="card"><div class="card-title">컨택 내역</div><div class="stat-value" id="data-ct-count" style="font-size:28px;margin-top:8px;">0</div><div class="text-sm text-muted mt16">건</div></div><div class="card"><div class="card-title">마지막 업데이트</div><div id="data-last-update" style="font-size:13px;color:var(--text2);margin-top:12px;">—</div></div></div>
 </div>
@@ -686,22 +729,126 @@ document.querySelectorAll('.nav-item').forEach(el=>el.addEventListener('click',(
 //  LOAD / SAVE
 //  data.json은 index.html과 같은 폴더에 위치
 // ════════════════════════════════
+// ════════════════════════════════
+//  GITHUB 설정
+// ════════════════════════════════
+const GH={
+  owner:'junpal5',
+  repo:'bid-tracker',
+  file:'data.json',
+  branch:'main',
+  get token(){return localStorage.getItem('gh_token')||'';},
+  get apiUrl(){return`https://api.github.com/repos/${this.owner}/${this.repo}/contents/${this.file}`;},
+  get rawUrl(){return`https://raw.githubusercontent.com/${this.owner}/${this.repo}/${this.branch}/${this.file}?t=`+Date.now();}
+};
+
+// ════════════════════════════════
+//  LOAD / SAVE
+// ════════════════════════════════
 async function loadDataJSON(){
   try{
-    const res=await fetch('./data.json?t='+Date.now());
-    if(!res.ok)return;
+    // GitHub raw URL에서 직접 불러오기 (캐시 방지)
+    const res=await fetch(GH.rawUrl);
+    if(!res.ok)throw new Error('GitHub 불러오기 실패');
     const j=await res.json();
     if(j.bids)DB.bids=j.bids;
     if(j.revenue)DB.revenue=j.revenue;
-    if(j.contacts)DB.contacts=j.contacts;
+    if(j.contacts)DB.contacts=j.contacts||[];
     if(j.meta)DB.meta=j.meta;
+    console.log('✅ GitHub에서 데이터 로드 완료');
     renderPage('home');
-  }catch(e){}
+  }catch(e){
+    console.warn('GitHub 로드 실패, localStorage 사용:', e.message);
+  }
 }
 function loadLS(){
   try{const d=localStorage.getItem('dashboard_db');if(!d)return;const p=JSON.parse(d);if(p.bids)DB.bids=p.bids;if(p.revenue)DB.revenue=p.revenue;if(p.contacts)DB.contacts=p.contacts||[];if(p.meta)DB.meta=p.meta;}catch(e){}
 }
-function saveLS(){DB.meta.lastUpdate=new Date().toISOString();localStorage.setItem('dashboard_db',JSON.stringify(DB));}
+function saveLS(){
+  DB.meta.lastUpdate=new Date().toISOString();
+  localStorage.setItem('dashboard_db',JSON.stringify(DB));
+  // 토큰이 설정된 경우 GitHub에도 자동 저장
+  if(GH.token) saveToGitHub();
+}
+
+// ════════════════════════════════
+//  GITHUB 저장 함수
+// ════════════════════════════════
+let ghSaveTimer=null;
+let ghSaving=false;
+
+async function saveToGitHub(){
+  // 연속 저장 시 디바운스 (1.5초 대기)
+  clearTimeout(ghSaveTimer);
+  ghSaveTimer=setTimeout(async()=>{
+    if(ghSaving) return;
+    ghSaving=true;
+    updateGhStatus('saving');
+    try{
+      // 현재 파일의 SHA 조회 (덮어쓰기에 필요)
+      const infoRes=await fetch(GH.apiUrl,{
+        headers:{'Authorization':'token '+GH.token,'Accept':'application/vnd.github.v3+json'}
+      });
+      if(!infoRes.ok) throw new Error('SHA 조회 실패 (토큰 또는 저장소 확인 필요)');
+      const info=await infoRes.json();
+      const sha=info.sha;
+
+      // 데이터를 base64로 인코딩해서 PUT
+      const content=btoa(unescape(encodeURIComponent(JSON.stringify(DB,null,2))));
+      const putRes=await fetch(GH.apiUrl,{
+        method:'PUT',
+        headers:{'Authorization':'token '+GH.token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+        body:JSON.stringify({
+          message:`dashboard: data update ${new Date().toLocaleString('ko-KR')}`,
+          content,sha,branch:GH.branch
+        })
+      });
+      if(!putRes.ok){
+        const err=await putRes.json();
+        throw new Error(err.message||'저장 실패');
+      }
+      updateGhStatus('saved');
+    }catch(e){
+      console.error('GitHub 저장 오류:', e.message);
+      updateGhStatus('error', e.message);
+    }finally{
+      ghSaving=false;
+    }
+  },1500);
+}
+
+function updateGhStatus(state, msg){
+  const el=document.getElementById('gh-sync-status');
+  if(!el) return;
+  const states={
+    saving:{icon:'⏳',text:'GitHub에 저장 중...', color:'var(--text3)'},
+    saved: {icon:'✅',text:'GitHub 저장 완료',    color:'var(--success)'},
+    error: {icon:'❌',text:'저장 실패: '+(msg||''), color:'var(--danger)'},
+    ready: {icon:'🔗',text:'GitHub 연동 중',      color:'var(--accent)'},
+    none:  {icon:'⚪',text:'GitHub 미연동 (로컬만 저장)', color:'var(--text3)'},
+  };
+  const s=states[state]||states.none;
+  el.innerHTML=`<span style="color:${s.color};font-size:12px;">${s.icon} ${s.text}</span>`;
+}
+
+function saveGhToken(){
+  const t=document.getElementById('gh-token-input').value.trim();
+  if(!t){showToast('토큰을 입력하세요.','error');return;}
+  localStorage.setItem('gh_token',t);
+  document.getElementById('gh-token-input').value='';
+  document.getElementById('gh-token-display').textContent='ghp_••••••••••••••••••••';
+  updateGhStatus('ready');
+  showToast('토큰이 저장되었습니다. 이제 데이터 변경 시 GitHub에 자동 저장됩니다.','success');
+  updateDataSummary();
+}
+function clearGhToken(){
+  if(!confirm('GitHub 토큰을 삭제할까요? 이후 저장은 로컬에만 됩니다.'))return;
+  localStorage.removeItem('gh_token');
+  document.getElementById('gh-token-display').textContent='미설정';
+  updateGhStatus('none');
+  showToast('토큰이 삭제되었습니다.','success');
+  updateDataSummary();
+}
 
 // ════════════════════════════════
 //  매출 자동 집계 헬퍼
@@ -1430,10 +1577,19 @@ function downloadTemplate(type){
   }
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();
 }
-function exportJSON(){DB.meta.lastUpdate=new Date().toISOString();const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='data.json';a.click();document.getElementById('json-status').textContent='✅ data.json 다운로드 완료. index.html과 함께 Netlify에 업로드하세요.';showToast('data.json 내보내기 완료','success');}
+function exportJSON(){DB.meta.lastUpdate=new Date().toISOString();const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='data.json';a.click();document.getElementById('json-status').textContent='✅ data.json 백업 다운로드 완료.';showToast('JSON 백업 완료','success');}
 function importJSON(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const j=JSON.parse(e.target.result);if(j.bids)DB.bids=j.bids;if(j.revenue)DB.revenue=j.revenue;if(j.contacts)DB.contacts=j.contacts||[];if(j.meta)DB.meta=j.meta;saveLS();refreshFilters();renderPage('home');updateDataSummary();document.getElementById('json-status').textContent=`✅ 불러오기 완료 (입찰 ${DB.bids.length}건 / 목표 ${DB.revenue.length}개 연도 / 컨택 ${DB.contacts.length}건)`;showToast('JSON 불러오기 완료','success');}catch(err){showToast('JSON 오류: '+err.message,'error');}event.target.value='';};reader.readAsText(file);}
 function clearData(type){const label={bids:'입찰 내역',contacts:'컨택 내역'}[type];if(!confirm(`${label} 데이터를 초기화할까요?`))return;if(type==='bids')DB.bids=[];else DB.contacts=[];saveLS();refreshFilters();renderPage('home');updateDataSummary();showToast('데이터가 초기화되었습니다.','success');}
-function updateDataSummary(){document.getElementById('data-bid-count').textContent=DB.bids.length;document.getElementById('data-rev-count').textContent=DB.revenue.length;document.getElementById('data-ct-count').textContent=DB.contacts.length;document.getElementById('data-last-update').textContent=DB.meta.lastUpdate?new Date(DB.meta.lastUpdate).toLocaleString('ko-KR'):'—';}
+function updateDataSummary(){
+  document.getElementById('data-bid-count').textContent=DB.bids.length;
+  document.getElementById('data-rev-count').textContent=DB.revenue.length;
+  document.getElementById('data-ct-count').textContent=DB.contacts.length;
+  document.getElementById('data-last-update').textContent=DB.meta.lastUpdate?new Date(DB.meta.lastUpdate).toLocaleString('ko-KR'):'—';
+  // 토큰 상태 표시
+  const dispEl=document.getElementById('gh-token-display');
+  if(dispEl) dispEl.textContent=GH.token?'ghp_••••••••••••••••••••':'미설정';
+  updateGhStatus(GH.token?'ready':'none');
+}
 
 // ════════════════════════════════
 //  DRAG & DROP
