@@ -289,6 +289,7 @@ textarea{resize:vertical;min-height:60px}
   <div class="nav-item" data-page="competitor"><span class="nav-icon">🏢</span><span>경쟁사 분석</span></div>
   <div class="nav-item" data-page="revenue"><span class="nav-icon">💰</span><span>매출 실적</span></div>
   <div class="nav-item" data-page="contacts"><span class="nav-icon">📞</span><span>컨택 건수</span></div>
+  <div class="nav-item" data-page="costs" onclick="tryOpenCosts(event)"><span class="nav-icon">📊</span><span>프로젝트별 비용률</span></div>
   <div class="nav-item" data-page="data"><span class="nav-icon">⚙️</span><span>데이터 관리</span></div>
 </nav>
 
@@ -308,6 +309,7 @@ textarea{resize:vertical;min-height:60px}
     <button class="mobile-tab" data-page="competitor" onclick="goPage('competitor')"><span class="tab-icon">🏢</span>경쟁사</button>
     <button class="mobile-tab" data-page="revenue" onclick="goPage('revenue')"><span class="tab-icon">💰</span>매출</button>
     <button class="mobile-tab" data-page="contacts" onclick="goPage('contacts')"><span class="tab-icon">📞</span>컨택</button>
+    <button class="mobile-tab" data-page="costs" onclick="tryOpenCosts()"><span class="tab-icon">📊</span>비용률</button>
     <button class="mobile-tab" data-page="data" onclick="goPage('data')"><span class="tab-icon">⚙️</span>설정</button>
   </div>
 </div>
@@ -409,7 +411,7 @@ textarea{resize:vertical;min-height:60px}
   <div class="card">
     <div class="card-title">입찰 목록</div>
     <!-- PC: 테이블 -->
-    <div class="table-wrap pc-only"><table><thead><tr><th>연도</th><th>입찰일</th><th>사업명</th><th>발주처</th><th>분야</th><th>유형</th><th>계약금액</th><th>기술평가</th><th>가격점수</th><th>경쟁사</th><th>낙찰사</th><th>결과</th><th>관리</th></tr></thead><tbody id="bids-tbody"></tbody></table></div>
+    <div class="table-wrap pc-only"><table><thead><tr><th>연도</th><th>입찰일</th><th>사업명</th><th>발주처</th><th>분야</th><th>유형</th><th>계약금액</th><th>기술평가</th><th>가격점수</th><th>경쟁사</th><th>낙찰사</th><th>결과</th><th>비용률</th><th>관리</th></tr></thead><tbody id="bids-tbody"></tbody></table></div>
     <!-- 모바일: 카드형 -->
     <div class="mobile-only" id="bids-cards"></div>
   </div>
@@ -509,7 +511,57 @@ textarea{resize:vertical;min-height:60px}
 </div>
 
 <!-- ══ DATA ══ -->
-<div class="page" id="page-data">
+<!-- ══ COSTS (비밀번호 보호) ══ -->
+<div class="page" id="page-costs">
+  <div class="page-header">
+    <div class="page-header-left"><h2>📊 프로젝트별 비용률</h2><p>수주 프로젝트의 항목별 비용 및 비용률 관리</p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="openCostForm()">＋ 비용 입력</button>
+      <button class="btn btn-outline" onclick="openCostPwChange()">🔒 비밀번호 변경</button>
+    </div>
+  </div>
+
+  <!-- 요약 카드 -->
+  <div class="grid3 mb16">
+    <div class="stat-card blue"><div class="stat-label">비용 등록 프로젝트</div><div class="stat-value" id="cost-count">0</div><div class="stat-sub">건</div></div>
+    <div class="stat-card warn"><div class="stat-label">평균 비용률</div><div class="stat-value" id="cost-avg-rate">—</div><div class="stat-sub">전체 평균</div></div>
+    <div class="stat-card green"><div class="stat-label">총 수주금액</div><div class="stat-value" style="font-size:20px;" id="cost-total-contract">—</div><div class="stat-sub">만원</div></div>
+  </div>
+
+  <!-- 비용률 목록 테이블 -->
+  <div class="card">
+    <div class="card-title">프로젝트별 비용 현황</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2">사업명</th>
+            <th rowspan="2">실 계약금액</th>
+            <th rowspan="2">할당 계약금액</th>
+            <th rowspan="2">면접조사비</th>
+            <th rowspan="2">전화조사비</th>
+            <th colspan="3" style="text-align:center;border-bottom:1px solid var(--border2);">온라인조사비</th>
+            <th rowspan="2">온라인 합계</th>
+            <th rowspan="2">기타추가경비</th>
+            <th rowspan="2">간접비</th>
+            <th rowspan="2">추가예상비용</th>
+            <th rowspan="2">총합계</th>
+            <th rowspan="2">비용률</th>
+            <th rowspan="2">관리</th>
+          </tr>
+          <tr>
+            <th>고정비</th>
+            <th>답례품비</th>
+            <th>문자수수료</th>
+          </tr>
+        </thead>
+        <tbody id="costs-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
   <div class="page-header"><div class="page-header-left"><h2>⚙️ 데이터 관리</h2><p>GitHub 자동 저장 · CSV 업로드 · 백업</p></div></div>
 
   <!-- GitHub 연동 설정 -->
@@ -573,7 +625,151 @@ textarea{resize:vertical;min-height:60px}
 </main>
 </div>
 
-<!-- ══ MODAL: 입찰 추가/수정 ══ -->
+<!-- ══ MODAL: 비용률 탭 비밀번호 ══ -->
+<div class="modal-overlay hidden" id="cost-pw-modal">
+<div class="modal modal-sm">
+  <h3><span>🔒 비밀번호 입력</span><button class="modal-close" onclick="closeModal('cost-pw-modal')">✕</button></h3>
+  <p class="text-sm text-muted mb16">프로젝트별 비용률 탭은 비밀번호로 보호되어 있습니다.</p>
+  <div class="form-group">
+    <label class="form-label">비밀번호</label>
+    <input type="password" id="cost-pw-input" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')verifyCostPw()">
+  </div>
+  <div id="cost-pw-error" style="color:var(--danger);font-size:12px;margin-top:-8px;margin-bottom:8px;display:none;">비밀번호가 틀렸습니다.</div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('cost-pw-modal')">취소</button>
+    <button class="btn btn-primary" onclick="verifyCostPw()">확인</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODAL: 비밀번호 변경 ══ -->
+<div class="modal-overlay hidden" id="cost-pw-change-modal">
+<div class="modal modal-sm">
+  <h3><span>🔒 비밀번호 변경</span><button class="modal-close" onclick="closeModal('cost-pw-change-modal')">✕</button></h3>
+  <div class="form-group">
+    <label class="form-label">현재 비밀번호</label>
+    <input type="password" id="cost-pw-old" placeholder="현재 비밀번호">
+  </div>
+  <div class="form-group">
+    <label class="form-label">새 비밀번호</label>
+    <input type="password" id="cost-pw-new" placeholder="새 비밀번호">
+  </div>
+  <div class="form-group">
+    <label class="form-label">새 비밀번호 확인</label>
+    <input type="password" id="cost-pw-new2" placeholder="새 비밀번호 재입력">
+  </div>
+  <div id="cost-pw-change-error" style="color:var(--danger);font-size:12px;margin-bottom:8px;display:none;"></div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('cost-pw-change-modal')">취소</button>
+    <button class="btn btn-primary" onclick="changeCostPw()">변경</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODAL: 비용 입력/수정 ══ -->
+<div class="modal-overlay hidden" id="cost-form-modal">
+<div class="modal">
+  <h3><span id="cost-form-title">비용 입력</span><button class="modal-close" onclick="closeModal('cost-form-modal')">✕</button></h3>
+  <input type="hidden" id="cf2-idx" value="-1">
+
+  <!-- 프로젝트 선택 -->
+  <div class="form-group">
+    <label class="form-label">프로젝트 선택 (수주 항목) *</label>
+    <select id="cf2-project" onchange="onCostProjectChange()">
+      <option value="">— 선택하세요 —</option>
+    </select>
+  </div>
+
+  <div class="form-row col2">
+    <div class="form-group">
+      <label class="form-label">실 계약금액 (만원)</label>
+      <input type="number" id="cf2-contract" placeholder="0" oninput="calcCostTotal()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">할당 계약금액 (만원)</label>
+      <input type="number" id="cf2-alloc" placeholder="0" oninput="calcCostTotal()">
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">비용 항목 입력 (만원)</div>
+
+  <div class="form-row col2">
+    <div class="form-group">
+      <label class="form-label">면접조사비</label>
+      <input type="number" id="cf2-interview" placeholder="0" oninput="calcCostTotal()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">전화조사비</label>
+      <input type="number" id="cf2-phone" placeholder="0" oninput="calcCostTotal()">
+    </div>
+  </div>
+
+  <!-- 온라인조사비 -->
+  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius2);padding:14px;margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;">온라인조사비</div>
+    <div class="form-row col3">
+      <div class="form-group">
+        <label class="form-label">고정비</label>
+        <input type="number" id="cf2-online-fixed" placeholder="0" oninput="calcCostTotal()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">답례품비</label>
+        <input type="number" id="cf2-online-gift" placeholder="0" oninput="calcCostTotal()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">문자수수료</label>
+        <input type="number" id="cf2-online-sms" placeholder="0" oninput="calcCostTotal()">
+      </div>
+    </div>
+    <div style="text-align:right;font-size:13px;color:var(--accent3);font-weight:600;">
+      온라인 합계: <span id="cf2-online-sum">0</span>만원
+    </div>
+  </div>
+
+  <div class="form-row col2">
+    <div class="form-group">
+      <label class="form-label">기타추가경비</label>
+      <input type="number" id="cf2-extra" placeholder="0" oninput="calcCostTotal()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">간접비</label>
+      <input type="number" id="cf2-indirect" placeholder="0" oninput="calcCostTotal()">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">추가예상비용</label>
+    <input type="number" id="cf2-additional" placeholder="0" oninput="calcCostTotal()">
+  </div>
+
+  <!-- 자동계산 결과 -->
+  <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius2);padding:14px;">
+    <div class="form-row col3">
+      <div>
+        <div class="stat-label">총합계</div>
+        <div style="font-size:20px;font-weight:800;color:var(--text);" id="cf2-total-display">—</div>
+        <div class="text-sm text-muted">만원</div>
+      </div>
+      <div>
+        <div class="stat-label">실 계약금액</div>
+        <div style="font-size:20px;font-weight:800;color:var(--accent);" id="cf2-contract-display">—</div>
+        <div class="text-sm text-muted">만원</div>
+      </div>
+      <div>
+        <div class="stat-label">비용률</div>
+        <div style="font-size:24px;font-weight:800;color:var(--warn);" id="cf2-rate-display">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('cost-form-modal')">취소</button>
+    <button class="btn btn-primary" onclick="saveCost()">저장</button>
+  </div>
+</div>
+</div>
+
+
 <div class="modal-overlay hidden" id="bid-form-modal">
 <div class="modal">
   <h3><span id="bid-form-title">입찰 추가</span><button class="modal-close" onclick="closeModal('bid-form-modal')">✕</button></h3>
@@ -671,9 +867,12 @@ textarea{resize:vertical;min-height:60px}
 //  revenue: [{ 연도:2025, 목표:100000 }]  ← 연간 목표만 저장
 //  월별 실적은 bids에서 자동 계산
 // ════════════════════════════════
-let DB={bids:[],revenue:[],contacts:[],meta:{lastUpdate:null}};
+let DB={bids:[],revenue:[],contacts:[],costs:[],meta:{lastUpdate:null}};
 const charts={};
 const MAX_COMP=10;
+const COST_PW_KEY='cost_pw';
+const COST_PW_DEFAULT='1234';
+function getCostPw(){return localStorage.getItem(COST_PW_KEY)||COST_PW_DEFAULT;}
 
 // 탭 필터 상태
 const BF={year:'all',field:'all',type:'all',result:'all'};
@@ -710,20 +909,61 @@ function setCtFilter(key,val,el){
 // ════════════════════════════════
 //  NAVIGATION
 // ════════════════════════════════
-const PAGE_TITLES={home:'📊 전체 현황',bids:'📋 수주/탈락 내역',competitor:'🏢 경쟁사 분석',revenue:'💰 매출 실적',contacts:'📞 컨택 건수',data:'⚙️ 데이터 관리'};
+const PAGE_TITLES={home:'📊 전체 현황',bids:'📋 수주/탈락 내역',competitor:'🏢 경쟁사 분석',revenue:'💰 매출 실적',contacts:'📞 컨택 건수',costs:'📊 프로젝트별 비용률',data:'⚙️ 데이터 관리'};
 function goPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.mobile-tab').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+n).classList.add('active');
-  document.querySelector(`.nav-item[data-page="${n}"]`).classList.add('active');
+  const navEl=document.querySelector(`.nav-item[data-page="${n}"]`);
+  if(navEl)navEl.classList.add('active');
   const mTab=document.querySelector(`.mobile-tab[data-page="${n}"]`);
   if(mTab)mTab.classList.add('active');
   const titleEl=document.getElementById('mobile-page-title');
   if(titleEl)titleEl.textContent=PAGE_TITLES[n]||'';
   renderPage(n);
 }
-document.querySelectorAll('.nav-item').forEach(el=>el.addEventListener('click',()=>goPage(el.dataset.page)));
+document.querySelectorAll('.nav-item').forEach(el=>{
+  // costs 탭은 별도 처리 (onclick 속성에서 처리)
+  if(el.dataset.page!=='costs') el.addEventListener('click',()=>goPage(el.dataset.page));
+});
+
+// ── 비용률 탭 비밀번호 보호 ──
+function tryOpenCosts(e){
+  if(e&&e.stopPropagation)e.stopPropagation();
+  if(sessionStorage.getItem('cost_auth')==='1'){goPage('costs');return;}
+  document.getElementById('cost-pw-input').value='';
+  document.getElementById('cost-pw-error').style.display='none';
+  openModal('cost-pw-modal');
+}
+function verifyCostPw(){
+  const input=document.getElementById('cost-pw-input').value;
+  if(input===getCostPw()){
+    sessionStorage.setItem('cost_auth','1');
+    closeModal('cost-pw-modal');
+    goPage('costs');
+  }else{
+    document.getElementById('cost-pw-error').style.display='block';
+    document.getElementById('cost-pw-input').value='';
+  }
+}
+function openCostPwChange(){
+  ['cost-pw-old','cost-pw-new','cost-pw-new2'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cost-pw-change-error').style.display='none';
+  openModal('cost-pw-change-modal');
+}
+function changeCostPw(){
+  const old=document.getElementById('cost-pw-old').value;
+  const nw=document.getElementById('cost-pw-new').value;
+  const nw2=document.getElementById('cost-pw-new2').value;
+  const errEl=document.getElementById('cost-pw-change-error');
+  if(old!==getCostPw()){errEl.textContent='현재 비밀번호가 틀렸습니다.';errEl.style.display='block';return;}
+  if(!nw){errEl.textContent='새 비밀번호를 입력하세요.';errEl.style.display='block';return;}
+  if(nw!==nw2){errEl.textContent='새 비밀번호가 일치하지 않습니다.';errEl.style.display='block';return;}
+  localStorage.setItem(COST_PW_KEY,nw);
+  closeModal('cost-pw-change-modal');
+  showToast('비밀번호가 변경되었습니다.','success');
+}
 
 // ════════════════════════════════
 //  LOAD / SAVE
@@ -754,6 +994,7 @@ async function loadDataJSON(){
     if(j.bids)DB.bids=j.bids;
     if(j.revenue)DB.revenue=j.revenue;
     if(j.contacts)DB.contacts=j.contacts||[];
+    if(j.costs)DB.costs=j.costs||[];
     if(j.meta)DB.meta=j.meta;
     console.log('✅ GitHub에서 데이터 로드 완료');
     renderPage('home');
@@ -762,7 +1003,7 @@ async function loadDataJSON(){
   }
 }
 function loadLS(){
-  try{const d=localStorage.getItem('dashboard_db');if(!d)return;const p=JSON.parse(d);if(p.bids)DB.bids=p.bids;if(p.revenue)DB.revenue=p.revenue;if(p.contacts)DB.contacts=p.contacts||[];if(p.meta)DB.meta=p.meta;}catch(e){}
+  try{const d=localStorage.getItem('dashboard_db');if(!d)return;const p=JSON.parse(d);if(p.bids)DB.bids=p.bids;if(p.revenue)DB.revenue=p.revenue;if(p.contacts)DB.contacts=p.contacts||[];if(p.costs)DB.costs=p.costs||[];if(p.meta)DB.meta=p.meta;}catch(e){}
 }
 function saveLS(){
   DB.meta.lastUpdate=new Date().toISOString();
@@ -1346,7 +1587,12 @@ function renderBids(){
   // 목록
   const sorted=[...data].sort((a,b)=>(b.입찰일||'').localeCompare(a.입찰일||''));
   const sc=(b,v)=>b.계약유형==='수의계약'?'<span style="font-size:11px;color:var(--text3);">—</span>':fmtScore(v);
-  document.getElementById('bids-tbody').innerHTML=sorted.length?sorted.map(b=>{const ri=DB.bids.indexOf(b);return`<tr>
+  document.getElementById('bids-tbody').innerHTML=sorted.length?sorted.map(b=>{const ri=DB.bids.indexOf(b);
+    const costData=DB.costs.find(c=>c.bidIdx===ri);
+    const rateCell=costData&&costData.rate!==null
+      ?`<span style="font-weight:700;font-size:12px;${costData.rate<=40?'color:var(--success)':costData.rate<=60?'color:var(--warn)':'color:var(--danger)'}">${costData.rate.toFixed(1)}%</span>`
+      :`<span style="color:var(--text3);font-size:11px;">—</span>`;
+    return`<tr>
     <td>${b.연도||'—'}</td><td>${b.입찰일||'—'}</td>
     <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${b.사업명}">${b.사업명}</td>
     <td>${b.발주처||'—'}</td>
@@ -1357,12 +1603,13 @@ function renderBids(){
     <td style="text-align:center;">${b.계약유형==='경쟁입찰'?`<strong>${b.competitors.length}</strong>`:'—'}</td>
     <td>${winnerBadge(b.낙찰사,b.결과)}</td>
     <td>${resultBadge(b.결과)}</td>
+    <td style="text-align:center;">${rateCell}</td>
     <td><div class="action-cell">
       <button class="btn-icon" onclick="openBidDetail(${ri})" title="상세">👁</button>
       <button class="btn-icon" onclick="openBidForm(${ri})" title="수정">✏️</button>
       <button class="btn-icon del" onclick="deleteBid(${ri})" title="삭제">🗑</button>
     </div></td>
-  </tr>`;}).join(''):`<tr><td colspan="13" style="text-align:center;padding:24px;color:var(--text3);">데이터 없음 — 우측 상단 "＋ 입찰 추가"로 입력하세요</td></tr>`;
+  </tr>`;}).join(''):`<tr><td colspan="14" style="text-align:center;padding:24px;color:var(--text3);">데이터 없음 — 우측 상단 "＋ 입찰 추가"로 입력하세요</td></tr>`;
 
   // 모바일 카드형 렌더링
   const cardsEl=document.getElementById('bids-cards');
@@ -1578,7 +1825,7 @@ function downloadTemplate(type){
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();
 }
 function exportJSON(){DB.meta.lastUpdate=new Date().toISOString();const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='data.json';a.click();document.getElementById('json-status').textContent='✅ data.json 백업 다운로드 완료.';showToast('JSON 백업 완료','success');}
-function importJSON(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const j=JSON.parse(e.target.result);if(j.bids)DB.bids=j.bids;if(j.revenue)DB.revenue=j.revenue;if(j.contacts)DB.contacts=j.contacts||[];if(j.meta)DB.meta=j.meta;saveLS();refreshFilters();renderPage('home');updateDataSummary();document.getElementById('json-status').textContent=`✅ 불러오기 완료 (입찰 ${DB.bids.length}건 / 목표 ${DB.revenue.length}개 연도 / 컨택 ${DB.contacts.length}건)`;showToast('JSON 불러오기 완료','success');}catch(err){showToast('JSON 오류: '+err.message,'error');}event.target.value='';};reader.readAsText(file);}
+function importJSON(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const j=JSON.parse(e.target.result);if(j.bids)DB.bids=j.bids;if(j.revenue)DB.revenue=j.revenue;if(j.contacts)DB.contacts=j.contacts||[];if(j.costs)DB.costs=j.costs||[];if(j.meta)DB.meta=j.meta;saveLS();refreshFilters();renderPage('home');updateDataSummary();document.getElementById('json-status').textContent=`✅ 불러오기 완료 (입찰 ${DB.bids.length}건 / 목표 ${DB.revenue.length}개 연도 / 컨택 ${DB.contacts.length}건 / 비용 ${DB.costs.length}건)`;showToast('JSON 불러오기 완료','success');}catch(err){showToast('JSON 오류: '+err.message,'error');}event.target.value='';};reader.readAsText(file);}
 function clearData(type){const label={bids:'입찰 내역',contacts:'컨택 내역'}[type];if(!confirm(`${label} 데이터를 초기화할까요?`))return;if(type==='bids')DB.bids=[];else DB.contacts=[];saveLS();refreshFilters();renderPage('home');updateDataSummary();showToast('데이터가 초기화되었습니다.','success');}
 function updateDataSummary(){
   document.getElementById('data-bid-count').textContent=DB.bids.length;
@@ -1606,7 +1853,151 @@ document.getElementById('ct-search').addEventListener('input',renderContacts);
 //  TOAST / ROUTER / INIT
 // ════════════════════════════════
 function showToast(msg,type='success'){const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3500);}
-function renderPage(n){if(n==='home')renderHome();else if(n==='bids')renderBids();else if(n==='competitor')renderCompetitor();else if(n==='revenue')renderRevenue();else if(n==='contacts')renderContacts();else if(n==='data')updateDataSummary();}
+
+// ════════════════════════════════
+//  비용률 CRUD
+// ════════════════════════════════
+function openCostForm(idx){
+  // 수주 프로젝트 목록 채우기
+  const sel=document.getElementById('cf2-project');
+  const wonBids=DB.bids.filter(b=>b.결과==='수주');
+  sel.innerHTML='<option value="">— 선택하세요 —</option>';
+  wonBids.forEach((b,i)=>{
+    const realIdx=DB.bids.indexOf(b);
+    sel.innerHTML+=`<option value="${realIdx}">${b.사업명} (${b.입찰일||b.연도||''})</option>`;
+  });
+
+  document.getElementById('cf2-idx').value=idx===undefined?-1:idx;
+  document.getElementById('cost-form-title').textContent=idx===undefined?'비용 입력':'비용 수정';
+
+  const fields=['cf2-contract','cf2-alloc','cf2-interview','cf2-phone','cf2-online-fixed','cf2-online-gift','cf2-online-sms','cf2-extra','cf2-indirect','cf2-additional'];
+  if(idx===undefined){
+    sel.value='';
+    fields.forEach(id=>document.getElementById(id).value='');
+  }else{
+    const c=DB.costs[idx];
+    sel.value=c.bidIdx!==undefined?c.bidIdx:'';
+    document.getElementById('cf2-contract').value=c.contract||'';
+    document.getElementById('cf2-alloc').value=c.alloc||'';
+    document.getElementById('cf2-interview').value=c.interview||'';
+    document.getElementById('cf2-phone').value=c.phone||'';
+    document.getElementById('cf2-online-fixed').value=c.onlineFixed||'';
+    document.getElementById('cf2-online-gift').value=c.onlineGift||'';
+    document.getElementById('cf2-online-sms').value=c.onlineSms||'';
+    document.getElementById('cf2-extra').value=c.extra||'';
+    document.getElementById('cf2-indirect').value=c.indirect||'';
+    document.getElementById('cf2-additional').value=c.additional||'';
+  }
+  calcCostTotal();
+  openModal('cost-form-modal');
+}
+
+function onCostProjectChange(){
+  const sel=document.getElementById('cf2-project');
+  const bidIdx=parseInt(sel.value);
+  if(isNaN(bidIdx)) return;
+  const b=DB.bids[bidIdx];
+  if(b&&b.계약금액){
+    document.getElementById('cf2-contract').value=b.계약금액;
+    document.getElementById('cf2-alloc').value=b.계약금액;
+    calcCostTotal();
+  }
+}
+
+function calcCostTotal(){
+  const g=id=>{const v=parseFloat(document.getElementById(id).value)||0;return v;};
+  const onlineFixed=g('cf2-online-fixed');
+  const onlineGift=g('cf2-online-gift');
+  const onlineSms=g('cf2-online-sms');
+  const onlineSum=onlineFixed+onlineGift+onlineSms;
+  const total=g('cf2-interview')+g('cf2-phone')+onlineSum+g('cf2-extra')+g('cf2-indirect')+g('cf2-additional');
+  const contract=g('cf2-contract');
+  const rate=contract>0?(total/contract*100):null;
+  document.getElementById('cf2-online-sum').textContent=onlineSum.toLocaleString();
+  document.getElementById('cf2-total-display').textContent=total?total.toLocaleString():'0';
+  document.getElementById('cf2-contract-display').textContent=contract?contract.toLocaleString():'—';
+  document.getElementById('cf2-rate-display').textContent=rate!==null?rate.toFixed(1)+'%':'—';
+}
+
+function saveCost(){
+  const bidIdxVal=document.getElementById('cf2-project').value;
+  if(!bidIdxVal){showToast('프로젝트를 선택하세요.','error');return;}
+  const bidIdx=parseInt(bidIdxVal);
+  const b=DB.bids[bidIdx];
+  if(!b){showToast('프로젝트를 찾을 수 없습니다.','error');return;}
+  const g=id=>{const v=parseFloat(document.getElementById(id).value)||0;return v||null;};
+  const contract=g('cf2-contract');
+  const onlineFixed=g('cf2-online-fixed')||0;
+  const onlineGift=g('cf2-online-gift')||0;
+  const onlineSms=g('cf2-online-sms')||0;
+  const onlineSum=onlineFixed+onlineGift+onlineSms;
+  const interview=g('cf2-interview')||0;
+  const phone=g('cf2-phone')||0;
+  const extra=g('cf2-extra')||0;
+  const indirect=g('cf2-indirect')||0;
+  const additional=g('cf2-additional')||0;
+  const total=interview+phone+onlineSum+extra+indirect+additional;
+  const rate=contract&&contract>0?+(total/contract*100).toFixed(2):null;
+  const cost={
+    bidIdx,사업명:b.사업명,입찰일:b.입찰일||'',연도:b.연도||'',
+    contract:contract||0,alloc:g('cf2-alloc')||0,
+    interview,phone,
+    onlineFixed,onlineGift,onlineSms,onlineSum,
+    extra,indirect,additional,
+    total,rate
+  };
+  const idx=parseInt(document.getElementById('cf2-idx').value);
+  // 같은 프로젝트 중복 체크 (수정 시 제외)
+  const dup=DB.costs.findIndex((c,i)=>c.bidIdx===bidIdx&&i!==idx);
+  if(dup!==-1){if(!confirm('이 프로젝트의 비용 데이터가 이미 있습니다. 덮어쓸까요?'))return;DB.costs.splice(dup,1);}
+  if(idx===-1)DB.costs.push(cost);else DB.costs[idx]=cost;
+  saveLS();renderPage('costs');renderBids();
+  closeModal('cost-form-modal');
+  showToast('비용 데이터가 저장되었습니다.','success');
+}
+
+function deleteCost(idx){
+  if(!confirm('이 비용 데이터를 삭제할까요?'))return;
+  DB.costs.splice(idx,1);
+  saveLS();renderPage('costs');renderBids();
+  showToast('삭제되었습니다.','success');
+}
+
+// ════════════════════════════════
+//  RENDER COSTS
+// ════════════════════════════════
+function renderCosts(){
+  const costs=DB.costs;
+  document.getElementById('cost-count').textContent=costs.length;
+  const rates=costs.filter(c=>c.rate!==null).map(c=>c.rate);
+  document.getElementById('cost-avg-rate').textContent=rates.length?(rates.reduce((a,b)=>a+b,0)/rates.length).toFixed(1)+'%':'—';
+  const totalContract=costs.reduce((s,c)=>s+(c.contract||0),0);
+  document.getElementById('cost-total-contract').textContent=totalContract?totalContract.toLocaleString():'—';
+
+  const rateColor=r=>r===null?'':r<=40?'color:var(--success)':r<=60?'color:var(--warn)':'color:var(--danger)';
+  document.getElementById('costs-tbody').innerHTML=costs.length?costs.map((c,i)=>`<tr>
+    <td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${c.사업명}">${c.사업명}</td>
+    <td style="text-align:right;">${c.contract?c.contract.toLocaleString():'—'}</td>
+    <td style="text-align:right;">${c.alloc?c.alloc.toLocaleString():'—'}</td>
+    <td style="text-align:right;">${c.interview?c.interview.toLocaleString():'—'}</td>
+    <td style="text-align:right;">${c.phone?c.phone.toLocaleString():'—'}</td>
+    <td style="text-align:right;">${c.onlineFixed?c.onlineFixed.toLocaleString():'—'}</td>
+    <td style="text-align:right;">${c.onlineGift?c.onlineGift.toLocaleString():'—'}</td>
+    <td style="text-align:right;">${c.onlineSms?c.onlineSms.toLocaleString():'—'}</td>
+    <td style="text-align:right;font-weight:600;color:var(--accent3);">${c.onlineSum?c.onlineSum.toLocaleString():'—'}</td>
+    <td style="text-align:right;">${c.extra?c.extra.toLocaleString():'—'}</td>
+    <td style="text-align:right;">${c.indirect?c.indirect.toLocaleString():'—'}</td>
+    <td style="text-align:right;">${c.additional?c.additional.toLocaleString():'—'}</td>
+    <td style="text-align:right;font-weight:700;">${c.total?c.total.toLocaleString():'—'}</td>
+    <td style="text-align:center;font-weight:800;font-size:14px;${rateColor(c.rate)}">${c.rate!==null?c.rate.toFixed(1)+'%':'—'}</td>
+    <td><div class="action-cell">
+      <button class="btn-icon" onclick="openCostForm(${i})" title="수정">✏️</button>
+      <button class="btn-icon del" onclick="deleteCost(${i})" title="삭제">🗑</button>
+    </div></td>
+  </tr>`).join(''):`<tr><td colspan="15" style="text-align:center;padding:32px;color:var(--text3);">비용 데이터 없음 — "＋ 비용 입력" 버튼으로 등록하세요</td></tr>`;
+}
+
+function renderPage(n){if(n==='home')renderHome();else if(n==='bids')renderBids();else if(n==='competitor')renderCompetitor();else if(n==='revenue')renderRevenue();else if(n==='contacts')renderContacts();else if(n==='costs')renderCosts();else if(n==='data')updateDataSummary();}
 (async()=>{loadLS();await loadDataJSON();refreshFilters();renderPage('home');updateDataSummary();})();
 </script>
 </body>
