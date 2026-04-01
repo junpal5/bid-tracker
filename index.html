@@ -1374,6 +1374,13 @@ function fieldBadge(field,small=false){
 }
 function winnerBadge(낙찰사,결과){if(!낙찰사&&결과!=='수주')return'<span style="color:var(--text3);font-size:11px;">—</span>';if(낙찰사==='우리팀')return`<span class="winner-chip">🏆 우리팀</span>`;return`<span class="winner-chip" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.3);">${낙찰사}</span>`;}
 function statusBadge(s){const m={검토중:'badge-blue',제안예정:'badge-warn',제안완료:'badge-purple',무산:'badge-danger',수주연결:'badge-success'};return`<span class="badge ${m[s]||'badge-blue'}">${s||'검토중'}</span>`;}
+function calcAggregateCostRate(costs){
+  const valid=(costs||[]).filter(c=>(c.total||0)>0&&(c.contractExVat||0)>0);
+  if(!valid.length)return null;
+  const totalCost=valid.reduce((sum,c)=>sum+(c.total||0),0);
+  const totalContractExVat=valid.reduce((sum,c)=>sum+(c.contractExVat||0),0);
+  return totalContractExVat>0?(totalCost/totalContractExVat*100):null;
+}
 
 // ════════════════════════════════
 //  CHART HELPERS
@@ -1639,16 +1646,16 @@ function renderHome(){
 
   const yearlyCostRows=DB.costs.reduce((acc,c)=>{
     const year=c.연도||'미지정';
-    if(c.rate===null||c.rate===undefined)return acc;
+    if((c.total||0)<=0||(c.contractExVat||0)<=0)return acc;
     if(!acc[year])acc[year]=[];
-    acc[year].push(c.rate);
+    acc[year].push(c);
     return acc;
   },{});
   const yearlyCostAvg=Object.entries(yearlyCostRows)
-    .map(([year,rates])=>({year,avg:rates.reduce((sum,v)=>sum+v,0)/rates.length,count:rates.length}))
+    .map(([year,costs])=>({year,avg:calcAggregateCostRate(costs),count:costs.length}))
     .sort((a,b)=>String(a.year).localeCompare(String(b.year)));
   const selectedCostAvg=hy==='all'
-    ? (yearlyCostAvg.length?yearlyCostAvg.reduce((sum,row)=>sum+row.avg,0)/yearlyCostAvg.length:null)
+    ? calcAggregateCostRate(DB.costs)
     : (yearlyCostAvg.find(row=>String(row.year)===String(hy))?.avg ?? null);
   document.getElementById('h-cost-rate').textContent=fmtPct(selectedCostAvg);
   document.getElementById('h-cost-rate-sub').textContent=hy==='all'
@@ -2142,8 +2149,8 @@ function deleteCost(idx){
 function renderCosts(){
   const costs=DB.costs;
   document.getElementById('cost-count').textContent=costs.length;
-  const rates=costs.filter(c=>c.rate!==null).map(c=>c.rate);
-  document.getElementById('cost-avg-rate').textContent=rates.length?(rates.reduce((a,b)=>a+b,0)/rates.length).toFixed(1)+'%':'—';
+  const aggregateRate=calcAggregateCostRate(costs);
+  document.getElementById('cost-avg-rate').textContent=aggregateRate!==null?aggregateRate.toFixed(1)+'%':'—';
   const totalContract=costs.reduce((s,c)=>s+(c.contract||0),0);
   document.getElementById('cost-total-contract').textContent=totalContract?totalContract.toLocaleString():'—';
 
