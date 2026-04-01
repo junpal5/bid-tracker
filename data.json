@@ -827,9 +827,29 @@
       "additional": 0,
       "total": 117,
       "rate": 12.87
+    },
+    {
+      "bidIdx": 13,
+      "사업명": "경기도 정책 개선을 위한 도민 의견조사",
+      "입찰일": "2025-08-11",
+      "연도": "2025",
+      "contract": 950,
+      "contractExVat": 864,
+      "alloc": 950,
+      "interview": 0,
+      "phone": 0,
+      "onlineFixed": 0,
+      "onlineGift": 0,
+      "onlineSms": 0,
+      "onlineSum": 0,
+      "extra": 136,
+      "indirect": 0,
+      "additional": 0,
+      "total": 136,
+      "rate": 15.74
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:57:28.198Z"
+    "lastUpdate": "2026-04-01T07:58:05.691Z"
   }
 }
