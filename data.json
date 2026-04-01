@@ -867,9 +867,29 @@
       "additional": 0,
       "total": 251.5,
       "rate": 35.93
+    },
+    {
+      "bidIdx": 15,
+      "사업명": "정책포털 만족도 조사",
+      "입찰일": "2025-10-29",
+      "연도": "2025",
+      "contract": 500,
+      "contractExVat": 455,
+      "alloc": 500,
+      "interview": 19,
+      "phone": 0,
+      "onlineFixed": 14,
+      "onlineGift": 50,
+      "onlineSms": 0,
+      "onlineSum": 64,
+      "extra": 0,
+      "indirect": 0,
+      "additional": 0,
+      "total": 83,
+      "rate": 18.24
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:58:29.044Z"
+    "lastUpdate": "2026-04-01T07:58:55.422Z"
   }
 }
