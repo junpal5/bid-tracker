@@ -887,9 +887,29 @@
       "additional": 0,
       "total": 83,
       "rate": 18.24
+    },
+    {
+      "bidIdx": 16,
+      "사업명": "공직자통합메일 만족도 조사",
+      "입찰일": "2025-10-31",
+      "연도": "2025",
+      "contract": 500,
+      "contractExVat": 455,
+      "alloc": 500,
+      "interview": 92,
+      "phone": 0,
+      "onlineFixed": 0,
+      "onlineGift": 95,
+      "onlineSms": 0,
+      "onlineSum": 95,
+      "extra": 0,
+      "indirect": 0,
+      "additional": 0,
+      "total": 187,
+      "rate": 41.1
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:58:55.422Z"
+    "lastUpdate": "2026-04-01T07:59:15.490Z"
   }
 }
