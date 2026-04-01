@@ -1863,9 +1863,14 @@ function openCostForm(idx){
   // 수주 프로젝트 목록 채우기
   const sel=document.getElementById('cf2-project');
   const wonBids=DB.bids.filter(b=>b.결과==='수주');
+  // 이미 비용 등록된 bidIdx 목록 (수정 시 자신 제외)
+  const currentBidIdx=idx!==undefined?DB.costs[idx]?.bidIdx:undefined;
+  const usedBidIdxs=new Set(DB.costs.map((c,i)=>(i===idx?null:c.bidIdx)).filter(v=>v!==null&&v!==undefined));
   sel.innerHTML='<option value="">— 선택하세요 —</option>';
-  wonBids.forEach((b,i)=>{
+  wonBids.forEach(b=>{
     const realIdx=DB.bids.indexOf(b);
+    // 이미 등록된 항목은 제외 (단, 수정 중인 항목 자신은 표시)
+    if(usedBidIdxs.has(realIdx)) return;
     sel.innerHTML+=`<option value="${realIdx}">${b.사업명} (${b.입찰일||b.연도||''})</option>`;
   });
 
