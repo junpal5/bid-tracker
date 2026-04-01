@@ -707,9 +707,29 @@
       "additional": 3514,
       "total": 17507,
       "rate": 36.34
+    },
+    {
+      "bidIdx": 6,
+      "사업명": "서울시민 디지털역량 실태조사",
+      "입찰일": "2025-08-27",
+      "연도": "2025",
+      "contract": 18500,
+      "contractExVat": 16818,
+      "alloc": 18500,
+      "interview": 6928,
+      "phone": 0,
+      "onlineFixed": 0,
+      "onlineGift": 0,
+      "onlineSms": 1,
+      "onlineSum": 1,
+      "extra": 244,
+      "indirect": 2,
+      "additional": 750,
+      "total": 7925,
+      "rate": 47.12
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:54:03.510Z"
+    "lastUpdate": "2026-04-01T07:54:48.571Z"
   }
 }
