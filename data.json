@@ -807,9 +807,29 @@
       "additional": 0,
       "total": 825,
       "rate": 68.75
+    },
+    {
+      "bidIdx": 12,
+      "사업명": "K-브랜드분쟁 대응전략 지원사업 성과조사",
+      "입찰일": "2025-07-30",
+      "연도": "2025",
+      "contract": 1000,
+      "contractExVat": 909,
+      "alloc": 1000,
+      "interview": 0,
+      "phone": 80,
+      "onlineFixed": 18,
+      "onlineGift": 0,
+      "onlineSms": 2,
+      "onlineSum": 20,
+      "extra": 17,
+      "indirect": 0,
+      "additional": 0,
+      "total": 117,
+      "rate": 12.87
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:56:56.478Z"
+    "lastUpdate": "2026-04-01T07:57:28.198Z"
   }
 }
