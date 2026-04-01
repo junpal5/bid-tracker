@@ -974,9 +974,29 @@
       "additional": 0,
       "total": 211,
       "rate": 24.68
+    },
+    {
+      "bidIdx": 20,
+      "사업명": "인터넷이용실태조사",
+      "입찰일": "2025-07-31",
+      "연도": "2025",
+      "contract": 13450,
+      "contractExVat": 12227,
+      "alloc": 13450,
+      "interview": 4364,
+      "phone": 0,
+      "onlineFixed": 2,
+      "onlineGift": 4,
+      "onlineSms": 0,
+      "onlineSum": 6,
+      "extra": 304,
+      "indirect": 3,
+      "additional": 2822,
+      "total": 7499,
+      "rate": 61.33
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T08:44:12.020Z"
+    "lastUpdate": "2026-04-01T08:45:21.378Z"
   }
 }
