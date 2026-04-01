@@ -687,9 +687,29 @@
       "additional": 250,
       "total": 11897,
       "rate": 52.88
+    },
+    {
+      "bidIdx": 4,
+      "사업명": "디지털정보격차 실태조사",
+      "입찰일": "2025-07-10",
+      "연도": "2025",
+      "contract": 52987,
+      "contractExVat": 48170,
+      "alloc": 52987,
+      "interview": 13519,
+      "phone": 0,
+      "onlineFixed": 10,
+      "onlineGift": 10,
+      "onlineSms": 0,
+      "onlineSum": 20,
+      "extra": 453,
+      "indirect": 2,
+      "additional": 3514,
+      "total": 17508,
+      "rate": 36.35
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:50:04.863Z"
+    "lastUpdate": "2026-04-01T07:53:00.842Z"
   }
 }
