@@ -699,17 +699,17 @@
       "interview": 13519,
       "phone": 0,
       "onlineFixed": 10,
-      "onlineGift": 10,
+      "onlineGift": 9,
       "onlineSms": 0,
-      "onlineSum": 20,
+      "onlineSum": 19,
       "extra": 453,
       "indirect": 2,
       "additional": 3514,
-      "total": 17508,
-      "rate": 36.35
+      "total": 17507,
+      "rate": 36.34
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:53:00.842Z"
+    "lastUpdate": "2026-04-01T07:54:03.510Z"
   }
 }
