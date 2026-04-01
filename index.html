@@ -936,17 +936,36 @@ textarea{resize:vertical;min-height:60px}
 //  revenue: [{ 연도:2025, 목표:100000 }]  ← 연간 목표만 저장
 //  월별 실적은 bids에서 자동 계산
 // ════════════════════════════════
-let DB={bids:[],revenue:[],contacts:[],costs:[],meta:{lastUpdate:null}};
+let DB={bids:[],revenue:[],contacts:[],costs:[],meta:{lastUpdate:null,costPw:null,dataPw:null}};
 const charts={};
 const MAX_COMP=10;
 const COST_PW_KEY='cost_pw';
 const COST_PW_DEFAULT='1234';
-function getCostPw(){return localStorage.getItem(COST_PW_KEY)||COST_PW_DEFAULT;}
+function ensureMeta(){
+  if(!DB.meta||typeof DB.meta!=='object')DB.meta={};
+  if(!Object.prototype.hasOwnProperty.call(DB.meta,'lastUpdate'))DB.meta.lastUpdate=null;
+  if(!Object.prototype.hasOwnProperty.call(DB.meta,'costPw'))DB.meta.costPw=null;
+  if(!Object.prototype.hasOwnProperty.call(DB.meta,'dataPw'))DB.meta.dataPw=null;
+}
+function getCostPw(){ensureMeta();return DB.meta.costPw||localStorage.getItem(COST_PW_KEY)||COST_PW_DEFAULT;}
 const DATA_PW_KEY='data_pw';
 const DATA_PW_DEFAULT='1234';
 const BID_NAME_WIDTH_KEY='bid_name_col_width';
-function getDataPw(){return localStorage.getItem(DATA_PW_KEY)||DATA_PW_DEFAULT;}
+function getDataPw(){ensureMeta();return DB.meta.dataPw||localStorage.getItem(DATA_PW_KEY)||DATA_PW_DEFAULT;}
 function getBidNameColWidth(){return parseInt(localStorage.getItem(BID_NAME_WIDTH_KEY)||'220',10);}
+function syncSharedPasswords(){
+  ensureMeta();
+  const localCost=localStorage.getItem(COST_PW_KEY);
+  const localData=localStorage.getItem(DATA_PW_KEY);
+  let changed=false;
+  if(!DB.meta.costPw&&localCost) {DB.meta.costPw=localCost; changed=true;}
+  if(!DB.meta.dataPw&&localData) {DB.meta.dataPw=localData; changed=true;}
+  if(!DB.meta.costPw) {DB.meta.costPw=COST_PW_DEFAULT; changed=true;}
+  if(!DB.meta.dataPw) {DB.meta.dataPw=DATA_PW_DEFAULT; changed=true;}
+  localStorage.setItem(COST_PW_KEY,DB.meta.costPw);
+  localStorage.setItem(DATA_PW_KEY,DB.meta.dataPw);
+  return changed;
+}
 
 // 탭 필터 상태
 const BF={year:'all',field:'all',type:'all',result:'all'};
@@ -1034,9 +1053,12 @@ function changeCostPw(){
   if(old!==getCostPw()){errEl.textContent='현재 비밀번호가 틀렸습니다.';errEl.style.display='block';return;}
   if(!nw){errEl.textContent='새 비밀번호를 입력하세요.';errEl.style.display='block';return;}
   if(nw!==nw2){errEl.textContent='새 비밀번호가 일치하지 않습니다.';errEl.style.display='block';return;}
+  ensureMeta();
+  DB.meta.costPw=nw;
   localStorage.setItem(COST_PW_KEY,nw);
+  saveLS();
   closeModal('cost-pw-change-modal');
-  showToast('비밀번호가 변경되었습니다.','success');
+  showToast('비밀번호가 변경되었습니다. 모든 기기에서 동일하게 사용됩니다.','success');
 }
 
 function tryOpenData(e){
@@ -1070,9 +1092,12 @@ function changeDataPw(){
   if(old!==getDataPw()){errEl.textContent='현재 비밀번호가 틀렸습니다.';errEl.style.display='block';return;}
   if(!nw){errEl.textContent='새 비밀번호를 입력하세요.';errEl.style.display='block';return;}
   if(nw!==nw2){errEl.textContent='새 비밀번호가 일치하지 않습니다.';errEl.style.display='block';return;}
+  ensureMeta();
+  DB.meta.dataPw=nw;
   localStorage.setItem(DATA_PW_KEY,nw);
+  saveLS();
   closeModal('data-pw-change-modal');
-  showToast('데이터 관리 비밀번호가 변경되었습니다.','success');
+  showToast('데이터 관리 비밀번호가 변경되었습니다. 모든 기기에서 동일하게 사용됩니다.','success');
 }
 
 // ════════════════════════════════
@@ -1106,6 +1131,7 @@ async function loadDataJSON(){
     if(j.contacts)DB.contacts=j.contacts||[];
     if(j.costs)DB.costs=j.costs||[];
     if(j.meta)DB.meta=j.meta;
+    ensureMeta();
     console.log('✅ GitHub에서 데이터 로드 완료');
     renderPage('home');
   }catch(e){
@@ -1113,9 +1139,10 @@ async function loadDataJSON(){
   }
 }
 function loadLS(){
-  try{const d=localStorage.getItem('dashboard_db');if(!d)return;const p=JSON.parse(d);if(p.bids)DB.bids=p.bids;if(p.revenue)DB.revenue=p.revenue;if(p.contacts)DB.contacts=p.contacts||[];if(p.costs)DB.costs=p.costs||[];if(p.meta)DB.meta=p.meta;}catch(e){}
+  try{const d=localStorage.getItem('dashboard_db');if(!d)return;const p=JSON.parse(d);if(p.bids)DB.bids=p.bids;if(p.revenue)DB.revenue=p.revenue;if(p.contacts)DB.contacts=p.contacts||[];if(p.costs)DB.costs=p.costs||[];if(p.meta)DB.meta=p.meta;ensureMeta();}catch(e){}
 }
 function saveLS(){
+  ensureMeta();
   DB.meta.lastUpdate=new Date().toISOString();
   localStorage.setItem('dashboard_db',JSON.stringify(DB));
   // 토큰이 설정된 경우 GitHub에도 자동 저장
@@ -1997,8 +2024,8 @@ function downloadTemplate(type){
   }
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();
 }
-function exportJSON(){DB.meta.lastUpdate=new Date().toISOString();const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='data.json';a.click();document.getElementById('json-status').textContent='✅ data.json 백업 다운로드 완료.';showToast('JSON 백업 완료','success');}
-function importJSON(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const j=JSON.parse(e.target.result);if(j.bids)DB.bids=j.bids;if(j.revenue)DB.revenue=j.revenue;if(j.contacts)DB.contacts=j.contacts||[];if(j.costs)DB.costs=j.costs||[];if(j.meta)DB.meta=j.meta;saveLS();refreshFilters();renderPage('home');updateDataSummary();document.getElementById('json-status').textContent=`✅ 불러오기 완료 (입찰 ${DB.bids.length}건 / 목표 ${DB.revenue.length}개 연도 / 컨택 ${DB.contacts.length}건 / 비용 ${DB.costs.length}건)`;showToast('JSON 불러오기 완료','success');}catch(err){showToast('JSON 오류: '+err.message,'error');}event.target.value='';};reader.readAsText(file);}
+function exportJSON(){ensureMeta();syncSharedPasswords();DB.meta.lastUpdate=new Date().toISOString();const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='data.json';a.click();document.getElementById('json-status').textContent='✅ data.json 백업 다운로드 완료.';showToast('JSON 백업 완료','success');}
+function importJSON(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const j=JSON.parse(e.target.result);if(j.bids)DB.bids=j.bids;if(j.revenue)DB.revenue=j.revenue;if(j.contacts)DB.contacts=j.contacts||[];if(j.costs)DB.costs=j.costs||[];if(j.meta)DB.meta=j.meta;syncSharedPasswords();saveLS();refreshFilters();renderPage('home');updateDataSummary();document.getElementById('json-status').textContent=`✅ 불러오기 완료 (입찰 ${DB.bids.length}건 / 목표 ${DB.revenue.length}개 연도 / 컨택 ${DB.contacts.length}건 / 비용 ${DB.costs.length}건)`;showToast('JSON 불러오기 완료','success');}catch(err){showToast('JSON 오류: '+err.message,'error');}event.target.value='';};reader.readAsText(file);}
 function clearData(type){const label={bids:'입찰 내역',contacts:'컨택 내역'}[type];if(!confirm(`${label} 데이터를 초기화할까요?`))return;if(type==='bids')DB.bids=[];else DB.contacts=[];saveLS();refreshFilters();renderPage('home');updateDataSummary();showToast('데이터가 초기화되었습니다.','success');}
 function updateDataSummary(){
   document.getElementById('data-bid-count').textContent=DB.bids.length;
@@ -2178,7 +2205,7 @@ function renderCosts(){
 }
 
 function renderPage(n){if(n==='home')renderHome();else if(n==='bids')renderBids();else if(n==='competitor')renderCompetitor();else if(n==='revenue')renderRevenue();else if(n==='contacts')renderContacts();else if(n==='costs')renderCosts();else if(n==='data')updateDataSummary();}
-(async()=>{setBidNameColWidth(getBidNameColWidth());loadLS();await loadDataJSON();refreshFilters();renderPage('home');updateDataSummary();})();
+(async()=>{setBidNameColWidth(getBidNameColWidth());loadLS();await loadDataJSON();const pwChanged=syncSharedPasswords();if(pwChanged)saveLS();refreshFilters();renderPage('home');updateDataSummary();})();
 </script>
 </body>
 </html>
