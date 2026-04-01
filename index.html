@@ -751,9 +751,9 @@ textarea{resize:vertical;min-height:60px}
         <div class="text-sm text-muted">만원</div>
       </div>
       <div>
-        <div class="stat-label">실 계약금액</div>
+        <div class="stat-label">실 계약금액 (VAT 제외)</div>
         <div style="font-size:20px;font-weight:800;color:var(--accent);" id="cf2-contract-display">—</div>
-        <div class="text-sm text-muted">만원</div>
+        <div class="text-sm text-muted">만원 (입력값 ÷ 1.1)</div>
       </div>
       <div>
         <div class="stat-label">비용률</div>
@@ -1912,10 +1912,11 @@ function calcCostTotal(){
   const onlineSum=onlineFixed+onlineGift+onlineSms;
   const total=g('cf2-interview')+g('cf2-phone')+onlineSum+g('cf2-extra')+g('cf2-indirect')+g('cf2-additional');
   const contract=g('cf2-contract');
-  const rate=contract>0?(total/contract*100):null;
+  const contractExVat=contract>0?contract/1.1:0; // VAT 제외 금액
+  const rate=contractExVat>0?(total/contractExVat*100):null;
   document.getElementById('cf2-online-sum').textContent=onlineSum.toLocaleString();
   document.getElementById('cf2-total-display').textContent=total?total.toLocaleString():'0';
-  document.getElementById('cf2-contract-display').textContent=contract?contract.toLocaleString():'—';
+  document.getElementById('cf2-contract-display').textContent=contractExVat?Math.round(contractExVat).toLocaleString():'—';
   document.getElementById('cf2-rate-display').textContent=rate!==null?rate.toFixed(1)+'%':'—';
 }
 
@@ -1927,6 +1928,7 @@ function saveCost(){
   if(!b){showToast('프로젝트를 찾을 수 없습니다.','error');return;}
   const g=id=>{const v=parseFloat(document.getElementById(id).value)||0;return v||null;};
   const contract=g('cf2-contract');
+  const contractExVat=contract?Math.round(contract/1.1):0; // VAT 제외
   const onlineFixed=g('cf2-online-fixed')||0;
   const onlineGift=g('cf2-online-gift')||0;
   const onlineSms=g('cf2-online-sms')||0;
@@ -1937,10 +1939,10 @@ function saveCost(){
   const indirect=g('cf2-indirect')||0;
   const additional=g('cf2-additional')||0;
   const total=interview+phone+onlineSum+extra+indirect+additional;
-  const rate=contract&&contract>0?+(total/contract*100).toFixed(2):null;
+  const rate=contractExVat>0?+(total/contractExVat*100).toFixed(2):null;
   const cost={
     bidIdx,사업명:b.사업명,입찰일:b.입찰일||'',연도:b.연도||'',
-    contract:contract||0,alloc:g('cf2-alloc')||0,
+    contract:contract||0,contractExVat,alloc:g('cf2-alloc')||0,
     interview,phone,
     onlineFixed,onlineGift,onlineSms,onlineSum,
     extra,indirect,additional,
