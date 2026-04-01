@@ -787,9 +787,29 @@
       "additional": 0,
       "total": 806,
       "rate": 59.09
+    },
+    {
+      "bidIdx": 11,
+      "사업명": "누가 한국을 움직이는가",
+      "입찰일": "2025-08-11",
+      "연도": "2025",
+      "contract": 1320,
+      "contractExVat": 1200,
+      "alloc": 1320,
+      "interview": 0,
+      "phone": 751,
+      "onlineFixed": 30,
+      "onlineGift": 39,
+      "onlineSms": 5,
+      "onlineSum": 74,
+      "extra": 0,
+      "indirect": 0,
+      "additional": 0,
+      "total": 825,
+      "rate": 68.75
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:56:28.296Z"
+    "lastUpdate": "2026-04-01T07:56:56.478Z"
   }
 }
