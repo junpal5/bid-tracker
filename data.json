@@ -747,9 +747,29 @@
       "additional": 7,
       "total": 29,
       "rate": 6.37
+    },
+    {
+      "bidIdx": 9,
+      "사업명": "안전관리인증기준(HACCP) 소비자 인지도 조사",
+      "입찰일": "2025-06-19",
+      "연도": "2025",
+      "contract": 2100,
+      "contractExVat": 1909,
+      "alloc": 2100,
+      "interview": 44,
+      "phone": 0,
+      "onlineFixed": 191,
+      "onlineGift": 184,
+      "onlineSms": 15,
+      "onlineSum": 390,
+      "extra": 105,
+      "indirect": 0,
+      "additional": 0,
+      "total": 539,
+      "rate": 28.23
     }
   ],
   "meta": {
-    "lastUpdate": "2026-04-01T07:55:20.537Z"
+    "lastUpdate": "2026-04-01T07:55:54.691Z"
   }
 }
