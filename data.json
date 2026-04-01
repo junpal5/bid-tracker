@@ -667,7 +667,29 @@
       "비고": ""
     }
   ],
+  "costs": [
+    {
+      "bidIdx": 2,
+      "사업명": "경기 라이프 서베이",
+      "입찰일": "2025-04-15",
+      "연도": "2025",
+      "contract": 24750,
+      "contractExVat": 22500,
+      "alloc": 24750,
+      "interview": 11503,
+      "phone": 0,
+      "onlineFixed": 0,
+      "onlineGift": 0,
+      "onlineSms": 0,
+      "onlineSum": 0,
+      "extra": 119,
+      "indirect": 25,
+      "additional": 250,
+      "total": 11897,
+      "rate": 52.88
+    }
+  ],
   "meta": {
-    "lastUpdate": "2026-04-01T05:07:12.163Z"
+    "lastUpdate": "2026-04-01T07:50:04.863Z"
   }
 }
