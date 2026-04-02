@@ -561,6 +561,13 @@ textarea{resize:vertical;min-height:60px}
     <div class="stat-card green"><div class="stat-label">총 수주금액</div><div class="stat-value" style="font-size:20px;" id="cost-total-contract">—</div><div class="stat-sub">만원</div></div>
   </div>
 
+  <div class="filter-row mb16">
+    <span class="filter-label">연도</span>
+    <div class="tab-filters" id="cost-year-tabs">
+      <button class="tab-btn active" onclick="setCostFilter('year','all',this)">전체</button>
+    </div>
+  </div>
+
   <!-- 비용률 목록 테이블 -->
   <div class="card">
     <div class="card-title">프로젝트별 비용 현황</div>
@@ -989,6 +996,7 @@ function syncSharedPasswords(){
 const BF={year:'all',field:'all',type:'all',result:'all'};
 const CF={year:'all',status:'all'};
 const COMPF={year:'all',name:'all'};
+const COSTF={year:'all'};
 let HF={year:'all'}; // 홈 화면 연도 필터
 let bidsVisibleCount=10;
 let costSort={key:'',dir:''};
@@ -1036,6 +1044,12 @@ function setCompFilter(key,val,el){
   el.closest('.tab-filters').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   renderCompetitor();
+}
+function setCostFilter(key,val,el){
+  COSTF[key]=val;
+  el.closest('.tab-filters').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderCosts();
 }
 function setCtFilter(key,val,el){
   CF[key]=val;
@@ -1369,8 +1383,9 @@ function getYears(){return[...new Set(DB.bids.map(b=>b.연도).filter(Boolean))]
 function getFields(){return[...new Set(DB.bids.map(b=>b.사업분야).filter(Boolean))].sort();}
 function getAllCompNames(){const s=new Set();DB.bids.filter(b=>b.계약유형==='경쟁입찰').forEach(b=>b.competitors.forEach(c=>{if(c.name)s.add(c.name);}));return[...s].sort();}
 function getCtYears(){return[...new Set(DB.contacts.map(c=>(c.컨택일||'').slice(0,4)).filter(Boolean))].sort().reverse();}
+function getCostYears(){return[...new Set(DB.costs.map(c=>c.연도).filter(Boolean))].sort().reverse();}
 function refreshFilters(){
-  const years=getYears(),fields=getFields(),comps=getAllCompNames(),ctYears=getCtYears();
+  const years=getYears(),fields=getFields(),comps=getAllCompNames(),ctYears=getCtYears(),costYears=getCostYears();
 
   // 홈 연도 탭
   const homeTabs=document.getElementById('home-year-tabs');
@@ -1410,6 +1425,11 @@ function refreshFilters(){
   if(ctyTabs){
     ctyTabs.innerHTML=`<button class="tab-btn${CF.year==='all'?' active':''}" onclick="setCtFilter('year','all',this)">전체</button>`;
     ctYears.forEach(y=>ctyTabs.innerHTML+=`<button class="tab-btn${CF.year===y?' active':''}" onclick="setCtFilter('year','${y}',this)">${y}년</button>`);
+  }
+  const costyTabs=document.getElementById('cost-year-tabs');
+  if(costyTabs){
+    costyTabs.innerHTML=`<button class="tab-btn${COSTF.year==='all'?' active':''}" onclick="setCostFilter('year','all',this)">전체</button>`;
+    costYears.forEach(y=>costyTabs.innerHTML+=`<button class="tab-btn${COSTF.year===y?' active':''}" onclick="setCostFilter('year','${y}',this)">${y}년</button>`);
   }
 }
 function filteredBids(yF,fF,tF,rF,search){
@@ -2233,7 +2253,7 @@ function deleteCost(idx){
 //  RENDER COSTS
 // ════════════════════════════════
 function renderCosts(){
-  const costs=DB.costs;
+  const costs=DB.costs.filter(c=>COSTF.year==='all'||String(c.연도)===String(COSTF.year));
   document.getElementById('cost-count').textContent=costs.length;
   const aggregateRate=calcAggregateCostRate(costs);
   document.getElementById('cost-avg-rate').textContent=aggregateRate!==null?aggregateRate.toFixed(1)+'%':'—';
