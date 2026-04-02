@@ -956,7 +956,7 @@ let DB={bids:[],revenue:[],contacts:[],costs:[],meta:{lastUpdate:null,costPw:nul
 const charts={};
 const MAX_COMP=10;
 const COST_PW_KEY='cost_pw';
-const COST_PW_DEFAULT='1234';
+const COST_PW_DEFAULT='1205';
 function ensureMeta(){
   if(!DB.meta||typeof DB.meta!=='object')DB.meta={};
   if(!Object.prototype.hasOwnProperty.call(DB.meta,'lastUpdate'))DB.meta.lastUpdate=null;
@@ -965,7 +965,7 @@ function ensureMeta(){
 }
 function getCostPw(){ensureMeta();return DB.meta.costPw||localStorage.getItem(COST_PW_KEY)||COST_PW_DEFAULT;}
 const DATA_PW_KEY='data_pw';
-const DATA_PW_DEFAULT='1234';
+const DATA_PW_DEFAULT='1205';
 const BID_NAME_WIDTH_KEY='bid_name_col_width';
 function getDataPw(){ensureMeta();return DB.meta.dataPw||localStorage.getItem(DATA_PW_KEY)||DATA_PW_DEFAULT;}
 function getBidNameColWidth(){return parseInt(localStorage.getItem(BID_NAME_WIDTH_KEY)||'220',10);}
