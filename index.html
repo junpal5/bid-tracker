@@ -139,6 +139,8 @@ textarea{resize:vertical;min-height:60px}
 .comp-score-stat{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
 .comp-score-price-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .load-more-wrap{display:flex;justify-content:center;margin-top:14px}
+.sortable-th{cursor:pointer;user-select:none;white-space:nowrap}
+.sortable-th:hover{color:var(--text);background:rgba(255,255,255,.03)}
 /* PC/모바일 전용 표시 유틸리티 */
 .mobile-only{display:none}
 .pc-only{display:block}
@@ -566,24 +568,24 @@ textarea{resize:vertical;min-height:60px}
       <table>
         <thead>
           <tr>
-            <th rowspan="2">사업명</th>
-            <th rowspan="2">실 계약금액</th>
-            <th rowspan="2">할당 계약금액</th>
-            <th rowspan="2">면접조사비</th>
-            <th rowspan="2">전화조사비</th>
+            <th rowspan="2" class="sortable-th" onclick="toggleCostSort('사업명')">사업명 <span id="cost-sort-사업명"></span></th>
+            <th rowspan="2" class="sortable-th" onclick="toggleCostSort('contract')">실 계약금액 <span id="cost-sort-contract"></span></th>
+            <th rowspan="2" class="sortable-th" onclick="toggleCostSort('alloc')">할당 계약금액 <span id="cost-sort-alloc"></span></th>
+            <th rowspan="2" class="sortable-th" onclick="toggleCostSort('interview')">면접조사비 <span id="cost-sort-interview"></span></th>
+            <th rowspan="2" class="sortable-th" onclick="toggleCostSort('phone')">전화조사비 <span id="cost-sort-phone"></span></th>
             <th colspan="3" style="text-align:center;border-bottom:1px solid var(--border2);">온라인조사비</th>
-            <th rowspan="2">온라인 합계</th>
-            <th rowspan="2">기타추가경비</th>
-            <th rowspan="2">간접비</th>
-            <th rowspan="2">추가예상비용</th>
-            <th rowspan="2">총합계</th>
-            <th rowspan="2">비용률</th>
+            <th rowspan="2" class="sortable-th" onclick="toggleCostSort('onlineSum')">온라인 합계 <span id="cost-sort-onlineSum"></span></th>
+            <th rowspan="2" class="sortable-th" onclick="toggleCostSort('extra')">기타추가경비 <span id="cost-sort-extra"></span></th>
+            <th rowspan="2" class="sortable-th" onclick="toggleCostSort('indirect')">간접비 <span id="cost-sort-indirect"></span></th>
+            <th rowspan="2" class="sortable-th" onclick="toggleCostSort('additional')">추가예상비용 <span id="cost-sort-additional"></span></th>
+            <th rowspan="2" class="sortable-th" onclick="toggleCostSort('total')">총합계 <span id="cost-sort-total"></span></th>
+            <th rowspan="2" class="sortable-th" onclick="toggleCostSort('rate')">비용률 <span id="cost-sort-rate"></span></th>
             <th rowspan="2">관리</th>
           </tr>
           <tr>
-            <th>고정비</th>
-            <th>답례품비</th>
-            <th>문자수수료</th>
+            <th class="sortable-th" onclick="toggleCostSort('onlineFixed')">고정비 <span id="cost-sort-onlineFixed"></span></th>
+            <th class="sortable-th" onclick="toggleCostSort('onlineGift')">답례품비 <span id="cost-sort-onlineGift"></span></th>
+            <th class="sortable-th" onclick="toggleCostSort('onlineSms')">문자수수료 <span id="cost-sort-onlineSms"></span></th>
           </tr>
         </thead>
         <tbody id="costs-tbody"></tbody>
@@ -989,6 +991,7 @@ const CF={year:'all',status:'all'};
 const COMPF={year:'all',name:'all'};
 let HF={year:'all'}; // 홈 화면 연도 필터
 let bidsVisibleCount=10;
+let costSort={key:'',dir:''};
 
 function resetBidListVisible(){
   bidsVisibleCount=10;
@@ -996,6 +999,22 @@ function resetBidListVisible(){
 function loadMoreBids(){
   bidsVisibleCount+=5;
   renderBids();
+}
+function toggleCostSort(key){
+  if(costSort.key!==key) costSort={key,dir:'asc'};
+  else if(costSort.dir==='asc') costSort={key,dir:'desc'};
+  else costSort={key:'',dir:''};
+  renderCosts();
+}
+function getCostSortValue(cost,key){
+  if(key==='사업명') return cost.사업명||'';
+  return cost[key];
+}
+function updateCostSortIndicators(){
+  document.querySelectorAll('[id^="cost-sort-"]').forEach(el=>el.textContent='');
+  if(!costSort.key||!costSort.dir)return;
+  const target=document.getElementById(`cost-sort-${costSort.key}`);
+  if(target)target.textContent=costSort.dir==='asc'?'▲':'▼';
 }
 
 function setHomeYear(val,el){
@@ -2222,7 +2241,23 @@ function renderCosts(){
   document.getElementById('cost-total-contract').textContent=totalContract?totalContract.toLocaleString():'—';
 
   const rateColor=r=>r===null?'':r<=40?'color:var(--success)':r<=60?'color:var(--warn)':'color:var(--danger)';
-  document.getElementById('costs-tbody').innerHTML=costs.length?costs.map((c,i)=>`<tr>
+  const sortedCosts=costs.map((c,i)=>({c,i})).sort((a,b)=>{
+    if(!costSort.key||!costSort.dir)return a.i-b.i;
+    const av=getCostSortValue(a.c,costSort.key);
+    const bv=getCostSortValue(b.c,costSort.key);
+    const aEmpty=av===null||av===undefined||av==='';
+    const bEmpty=bv===null||bv===undefined||bv==='';
+    if(aEmpty&&bEmpty)return a.i-b.i;
+    if(aEmpty)return 1;
+    if(bEmpty)return -1;
+    let result=0;
+    if(typeof av==='string'||typeof bv==='string') result=String(av).localeCompare(String(bv),'ko');
+    else result=Number(av)-Number(bv);
+    if(result===0)return a.i-b.i;
+    return costSort.dir==='asc'?result:-result;
+  });
+  updateCostSortIndicators();
+  document.getElementById('costs-tbody').innerHTML=sortedCosts.length?sortedCosts.map(({c,i})=>`<tr>
     <td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${c.사업명}">${c.사업명}</td>
     <td style="text-align:right;">${c.contract?c.contract.toLocaleString():'—'}</td>
     <td style="text-align:right;">${c.alloc?c.alloc.toLocaleString():'—'}</td>
