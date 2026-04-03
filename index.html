@@ -519,10 +519,7 @@ textarea{resize:vertical;min-height:60px}
     <div class="page-header-left"><h2>💰 매출 실적</h2><p>연간 목표 대비 수주 실적 달성률 (수주 항목 VAT 제외 계약금액 자동 집계)</p></div>
     <button class="btn btn-primary" onclick="openRevGoalForm()">🎯 연간 목표 설정</button>
   </div>
-  <div class="controls">
-    <button class="btn btn-outline active" id="rev-btn-2025" onclick="setRevYear(2025)">2025년</button>
-    <button class="btn btn-outline" id="rev-btn-2026" onclick="setRevYear(2026)">2026년</button>
-  </div>
+  <div class="controls" id="rev-year-controls"></div>
 
   <!-- 연간 목표 대비 요약 -->
   <div class="grid4 mb16">
@@ -648,7 +645,7 @@ textarea{resize:vertical;min-height:60px}
 
 <!-- ══ DATA ══ -->
 <div class="page" id="page-data">
-  <div class="page-header"><div class="page-header-left"><h2>⚙️ 데이터 관리</h2><p>GitHub 자동 저장 · CSV 업로드 · 백업</p></div><button class="btn btn-outline" onclick="openDataPwChange()">🔒 비밀번호 변경</button></div>
+  <div class="page-header"><div class="page-header-left"><h2>⚙️ 데이터 관리</h2><p>GitHub 자동 저장 · 백업</p></div><button class="btn btn-outline" onclick="openDataPwChange()">🔒 비밀번호 변경</button></div>
 
   <!-- GitHub 연동 설정 -->
   <div class="section-title">🔗 GitHub 자동 저장 설정</div>
@@ -710,14 +707,6 @@ textarea{resize:vertical;min-height:60px}
       </div>
     </div>
   </div>
-
-  <!-- CSV 업로드 -->
-  <div class="section-title">CSV 업로드 (일괄 등록)</div>
-  <div class="grid2 mb16">
-    <div class="card"><div class="card-title">입찰 내역 CSV</div><div class="upload-zone" id="bid-upload-zone" onclick="document.getElementById('bid-csv-input').click()"><div class="upload-icon">📂</div><div class="upload-text">클릭 또는 드래그</div><div class="upload-sub">bids_template.csv</div></div><input type="file" id="bid-csv-input" accept=".csv" style="display:none;" onchange="handleCSV(event,'bids')"><div class="flex gap8 mt16"><button class="btn btn-outline btn-sm" onclick="downloadTemplate('bids')">📥 템플릿</button><button class="btn btn-danger btn-sm" onclick="clearData('bids')">🗑 초기화</button></div><div id="bid-upload-status" class="text-sm text-muted mt16"></div></div>
-    <div class="card"><div class="card-title">컨택 내역 CSV</div><div class="upload-zone" id="ct-upload-zone" onclick="document.getElementById('ct-csv-input').click()"><div class="upload-icon">📂</div><div class="upload-text">클릭 또는 드래그</div><div class="upload-sub">contacts_template.csv</div></div><input type="file" id="ct-csv-input" accept=".csv" style="display:none;" onchange="handleCSV(event,'contacts')"><div class="flex gap8 mt16"><button class="btn btn-outline btn-sm" onclick="downloadTemplate('contacts')">📥 템플릿</button><button class="btn btn-danger btn-sm" onclick="clearData('contacts')">🗑 초기화</button></div><div id="ct-upload-status" class="text-sm text-muted mt16"></div></div>
-  </div>
-  <div class="auto-note mb16">📌 매출 실적 CSV는 더 이상 필요하지 않습니다. 수주/탈락 내역의 수주 건 계약금액이 자동 집계됩니다. 연간 목표 매출은 매출 실적 탭의 "🎯 연간 목표 설정" 버튼으로 입력하세요.</div>
 
   <!-- 백업 -->
   <div class="section-title">백업 / 복원</div>
@@ -1159,6 +1148,7 @@ function goPage(n){
   if(titleEl)titleEl.textContent=PAGE_TITLES[n]||'';
   renderPage(n);
   mountAppSyncIndicator();
+  window.scrollTo({top:0,left:0,behavior:'auto'});
 }
 document.querySelectorAll('.nav-item').forEach(el=>{
   // 보호 탭은 별도 처리 (onclick 속성에서 처리)
@@ -1694,6 +1684,32 @@ function getFields(){return[...new Set(DB.bids.map(b=>b.사업분야).filter(Boo
 function getAllCompNames(){const s=new Set();DB.bids.filter(b=>b.계약유형==='경쟁입찰').forEach(b=>b.competitors.forEach(c=>{if(c.name)s.add(c.name);}));return[...s].sort();}
 function getCtYears(){return[...new Set(DB.contacts.map(c=>(c.컨택일||'').slice(0,4)).filter(Boolean))].sort().reverse();}
 function getCostYears(){return[...new Set(DB.costs.map(c=>c.연도).filter(Boolean))].sort().reverse();}
+function getRevenueYears(){
+  const currentYear=new Date().getFullYear();
+  const years=new Set([currentYear]);
+  DB.revenue.forEach(r=>{if(r?.연도)years.add(Number(r.연도));});
+  DB.bids.forEach(b=>{
+    const bidYear=Number(b?.연도||String(b?.입찰일||'').slice(0,4));
+    if(bidYear)years.add(bidYear);
+  });
+  return [...years].sort((a,b)=>{
+    if(a===currentYear&&b!==currentYear)return -1;
+    if(b===currentYear&&a!==currentYear)return 1;
+    return b-a;
+  });
+}
+function ensureRevenueYear(){
+  const years=getRevenueYears();
+  if(!years.length){revYear=new Date().getFullYear();return years;}
+  if(!years.includes(Number(revYear)))revYear=years[0];
+  return years;
+}
+function renderRevenueYearControls(){
+  const wrap=document.getElementById('rev-year-controls');
+  if(!wrap)return;
+  const years=ensureRevenueYear();
+  wrap.innerHTML=years.map(y=>`<button class="btn btn-outline${Number(revYear)===Number(y)?' active':''}" id="rev-btn-${y}" onclick="setRevYear(${y})">${y}년</button>`).join('');
+}
 function refreshFilters(){
   const years=getYears(),fields=getFields(),comps=getAllCompNames(),ctYears=getCtYears(),costYears=getCostYears();
 
@@ -1741,6 +1757,7 @@ function refreshFilters(){
     costyTabs.innerHTML=`<button class="tab-btn${COSTF.year==='all'?' active':''}" onclick="setCostFilter('year','all',this)">전체</button>`;
     costYears.forEach(y=>costyTabs.innerHTML+=`<button class="tab-btn${COSTF.year===y?' active':''}" onclick="setCostFilter('year','${y}',this)">${y}년</button>`);
   }
+  renderRevenueYearControls();
 }
 function filteredBids(yF,fF,tF,rF,search){
   // 인자가 없으면 탭 상태 변수 사용
@@ -2310,7 +2327,17 @@ function renderCompetitor(){
   const yF=COMPF.year,cF=COMPF.name;
   const data=DB.bids.filter(b=>{if(b.계약유형!=='경쟁입찰')return false;if(yF!=='all'&&b.연도!=yF)return false;if(cF!=='all'&&!b.competitors.some(c=>c.name===cF))return false;return true;});
   const compMap={};
-  data.forEach(b=>b.competitors.forEach(c=>{if(!c.name)return;if(!compMap[c.name])compMap[c.name]={total:0,ourWin:0,compWin:0,techs:[],prices:[]};const m=compMap[c.name];m.total++;if(b.결과==='수주')m.ourWin++;if(b.낙찰사===c.name)m.compWin++;if(c.기술!==null)m.techs.push(c.기술);if(c.가격!==null)m.prices.push(c.가격);}));
+  data.forEach(b=>b.competitors.forEach(c=>{
+    if(!c.name)return;
+    if(cF!=='all'&&c.name!==cF)return;
+    if(!compMap[c.name])compMap[c.name]={total:0,ourWin:0,compWin:0,techs:[],prices:[]};
+    const m=compMap[c.name];
+    m.total++;
+    if(b.결과==='수주')m.ourWin++;
+    if(b.낙찰사===c.name)m.compWin++;
+    if(c.기술!==null)m.techs.push(c.기술);
+    if(c.가격!==null)m.prices.push(c.가격);
+  }));
   document.getElementById('comp-summary-tbody').innerHTML=Object.entries(compMap).sort((a,b)=>b[1].total-a[1].total).map(([name,d])=>`<tr><td><strong>${name}</strong></td><td>${d.total}</td><td><span class="badge badge-success">${d.ourWin}</span></td><td><span class="badge badge-danger">${d.compWin}</span></td><td>${d.total>0?(d.compWin/d.total*100).toFixed(1)+'%':'—'}</td></tr>`).join('')||`<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3);">경쟁사 데이터 없음</td></tr>`;
   const sorted=[...data].filter(b=>b.competitors.length>0).sort((a,b)=>(b.입찰일||'').localeCompare(a.입찰일||''));
   document.getElementById('comp-detail-list').innerHTML=sorted.length?sorted.map(b=>{
@@ -2325,9 +2352,11 @@ function renderCompetitor(){
 //  실적: bids에서 자동 집계
 // ════════════════════════════════
 let revYear=new Date().getFullYear();
-function setRevYear(y){revYear=y;document.getElementById('rev-btn-2025').classList.toggle('active',y===2025);document.getElementById('rev-btn-2026').classList.toggle('active',y===2026);renderRevenue();}
+function setRevYear(y){revYear=Number(y);renderRevenueYearControls();renderRevenue();}
 
 function renderRevenue(){
+  ensureRevenueYear();
+  renderRevenueYearControls();
   const months=Array.from({length:12},(_,i)=>i+1);
   const revRow=DB.revenue.find(r=>r.연도==revYear);
   const annualGoal=revRow?revRow.목표:null;
