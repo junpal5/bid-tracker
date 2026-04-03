@@ -1270,8 +1270,26 @@ const GH={
 //  LOAD / SAVE
 // ════════════════════════════════
 async function loadDataJSON(){
+  // 1단계: 같은 폴더의 data.json 시도 (로컬 파일 / GitHub Pages)
   try{
-    // GitHub raw URL에서 직접 불러오기 (캐시 방지)
+    const localRes=await fetch('./data.json?t='+Date.now());
+    if(localRes.ok){
+      const j=await localRes.json();
+      if(j.bids)DB.bids=j.bids;
+      if(j.revenue)DB.revenue=j.revenue;
+      if(j.contacts)DB.contacts=j.contacts||[];
+      if(j.costs)DB.costs=j.costs||[];
+      if(j.meta)DB.meta=j.meta;
+      ensureMeta();
+      console.log('✅ 로컬 data.json에서 데이터 로드 완료');
+      renderPage('home');
+      return;
+    }
+  }catch(e){
+    console.warn('로컬 data.json 로드 실패:', e.message);
+  }
+  // 2단계: GitHub raw URL 시도
+  try{
     const res=await fetch(GH.rawUrl);
     if(!res.ok)throw new Error('GitHub 불러오기 실패');
     const j=await res.json();
@@ -1283,9 +1301,12 @@ async function loadDataJSON(){
     ensureMeta();
     console.log('✅ GitHub에서 데이터 로드 완료');
     renderPage('home');
+    return;
   }catch(e){
-    console.warn('GitHub 로드 실패, localStorage 사용:', e.message);
+    console.warn('GitHub 로드 실패:', e.message);
   }
+  // 3단계: localStorage fallback
+  console.warn('⚠️ 원격 데이터 로드 실패 — localStorage 사용');
 }
 function ensureVersionData(){
   if(!VERSION_DATA||typeof VERSION_DATA!=='object')VERSION_DATA={};
@@ -1500,7 +1521,8 @@ async function saveVersionHistory(){
   const versionInput=document.getElementById('version-name-input');
   const changesInput=document.getElementById('version-change-input');
   const nextVersion=versionInput?versionInput.value.trim():'';
-  const changes=(changesInput?changesInput.value:'').split(/?
+  const changes=(changesInput?changesInput.value:'').split(/
+?
 /).map(v=>v.trim()).filter(Boolean);
   if(!nextVersion){setVersionStatus('버전명을 입력해 주세요.','error');return;}
   if(nextVersion===VERSION_DATA.currentVersion){setVersionStatus('현재 버전과 다른 버전명을 입력해 주세요.','error');return;}
