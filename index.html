@@ -1603,6 +1603,7 @@ function setBidNameColWidth(value){
 function buildCompetitorScoreDetail(b){
   const pal=['#ef4444','#f59e0b','#8b5cf6','#06b6d4','#84cc16'];
   const cwp=calcCompPrices(b).slice().sort((a,b2)=>((b2.기술||0)+(b2.가격||0))-((a.기술||0)+(a.가격||0)));
+  const compColorMap=Object.fromEntries(cwp.map((c,ci)=>[c.name,pal[ci%pal.length]]));
   const bars=['기술평가','가격점수'].map((label,li)=>{
     const ourKey=li===0?'우리기술':'우리가격';
     const compKey=li===0?'기술':'가격';
@@ -1612,7 +1613,7 @@ function buildCompetitorScoreDetail(b){
     if(!all.length)return '';
     return `<div><div style="font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:600;">${label}</div>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><div style="width:66px;font-size:10px;color:var(--accent);text-align:right;flex-shrink:0;">우리팀</div><div class="score-bar-track" style="flex:1;height:10px;"><div class="score-bar-fill" style="width:${b[ourKey]!==null?b[ourKey]/mx*100:0}%;background:#4f7cff;"></div></div><div style="width:32px;font-size:10px;text-align:right;">${fmtScore(b[ourKey])}</div></div>
-      ${sortedForBar.map((c,ci)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><div style="width:66px;font-size:10px;color:${pal[ci%pal.length]};text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${c.name}">${c.name}</div><div class="score-bar-track" style="flex:1;height:10px;"><div class="score-bar-fill" style="width:${c[compKey]!==null?c[compKey]/mx*100:0}%;background:${pal[ci%pal.length]};"></div></div><div style="width:32px;font-size:10px;text-align:right;">${fmtScore(c[compKey])}</div></div>`).join('')}
+      ${sortedForBar.map(c=>{const compColor=compColorMap[c.name]||pal[0];return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><div style="width:66px;font-size:10px;color:${compColor};text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${c.name}">${c.name}</div><div class="score-bar-track" style="flex:1;height:10px;"><div class="score-bar-fill" style="width:${c[compKey]!==null?c[compKey]/mx*100:0}%;background:${compColor};"></div></div><div style="width:32px;font-size:10px;text-align:right;">${fmtScore(c[compKey])}</div></div>`;}).join('')}
     </div>`;
   }).join('');
   const priceCards=cwp.filter(c=>c.추정제안가!==null).map(c=>{
@@ -2072,6 +2073,7 @@ function openBidDetail(idx){
     // 점수 막대
     if(cwp.length>0){
       const pal=['#ef4444','#f59e0b','#8b5cf6','#06b6d4','#84cc16'];
+      const compColorMap=Object.fromEntries(cwp.map((c,ci)=>[c.name,pal[ci%pal.length]]));
       ['기술평가','가격점수'].forEach((label,li)=>{
         const ourKey=li===0?'우리기술':'우리가격';
         const compKey=li===0?'기술':'가격';
@@ -2080,7 +2082,7 @@ function openBidDetail(idx){
         if(!all.length)return;
         html+=`<div style="margin-bottom:14px;"><div style="font-size:12px;color:var(--text3);margin-bottom:6px;font-weight:600;">${label}</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><div style="width:60px;font-size:11px;color:var(--accent);text-align:right;flex-shrink:0;">우리팀</div><div class="score-bar-track" style="flex:1;"><div class="score-bar-fill" style="width:${b[ourKey]!==null?b[ourKey]/mx*100:0}%;background:#4f7cff;">${fmtScore(b[ourKey])}</div></div></div>
-        ${cwp.map((c,ci)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><div style="width:60px;font-size:11px;color:${pal[ci%pal.length]};text-align:right;flex-shrink:0;">${c.name}</div><div class="score-bar-track" style="flex:1;"><div class="score-bar-fill" style="width:${c[compKey]!==null?c[compKey]/mx*100:0}%;background:${pal[ci%pal.length]};">${fmtScore(c[compKey])}</div></div></div>`).join('')}
+        ${cwp.map(c=>{const compColor=compColorMap[c.name]||pal[0];return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><div style="width:60px;font-size:11px;color:${compColor};text-align:right;flex-shrink:0;">${c.name}</div><div class="score-bar-track" style="flex:1;"><div class="score-bar-fill" style="width:${c[compKey]!==null?c[compKey]/mx*100:0}%;background:${compColor};">${fmtScore(c[compKey])}</div></div></div>`;}).join('')}
         </div>`;
       });
     }
