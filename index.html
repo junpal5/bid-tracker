@@ -1521,9 +1521,7 @@ async function saveVersionHistory(){
   const versionInput=document.getElementById('version-name-input');
   const changesInput=document.getElementById('version-change-input');
   const nextVersion=versionInput?versionInput.value.trim():'';
-  const changes=(changesInput?changesInput.value:'').split(/
-?
-/).map(v=>v.trim()).filter(Boolean);
+  const changes=(changesInput?changesInput.value:'').split(/\r?\n/).map(v=>v.trim()).filter(Boolean);
   if(!nextVersion){setVersionStatus('버전명을 입력해 주세요.','error');return;}
   if(nextVersion===VERSION_DATA.currentVersion){setVersionStatus('현재 버전과 다른 버전명을 입력해 주세요.','error');return;}
   if(!changes.length){setVersionStatus('수정사항을 한 줄 이상 입력해 주세요.','error');return;}
