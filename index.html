@@ -442,7 +442,7 @@ textarea{resize:vertical;min-height:60px}
       </label>
     </div>
     <!-- PC: 테이블 -->
-    <div class="table-wrap pc-only"><table><thead><tr><th>연도</th><th>입찰일</th><th class="bid-name-col">사업명</th><th>발주처</th><th>분야</th><th>유형</th><th>계약금액</th><th>기술평가</th><th>가격점수</th><th>경쟁사</th><th>낙찰사</th><th>결과</th><th>비용률</th><th>관리</th></tr></thead><tbody id="bids-tbody"></tbody></table></div>
+    <div class="table-wrap pc-only"><table><thead><tr><th>연도</th><th>입찰일</th><th class="bid-name-col">사업명</th><th>발주처</th><th>분야</th><th>유형</th><th>사업금액</th><th>계약금액</th><th>기술평가</th><th>가격점수</th><th>경쟁사</th><th>낙찰사</th><th>결과</th><th>비용률</th><th>관리</th></tr></thead><tbody id="bids-tbody"></tbody></table></div>
     <!-- 모바일: 카드형 -->
     <div class="mobile-only" id="bids-cards"></div>
     <div class="load-more-wrap"><button class="btn btn-outline" id="bids-load-more" onclick="loadMoreBids()" style="display:none;">더보기</button></div>
@@ -870,7 +870,10 @@ textarea{resize:vertical;min-height:60px}
     <div class="form-group"><label class="form-label">계약유형 *</label><select id="bf-type" onchange="toggleSoleMode()"><option value="경쟁입찰">경쟁 입찰</option><option value="수의계약">수의 계약</option></select></div>
     <div class="form-group"><label class="form-label">결과 *</label><select id="bf-result" onchange="toggleWinnerField()"><option value="입찰중">입찰중</option><option value="수주">수주</option><option value="탈락">탈락</option></select></div>
   </div>
-  <div class="form-group"><label class="form-label">계약금액 (만원) <span style="color:var(--text3);font-weight:400;">(수주 시 비워두면 제안가격 자동 적용)</span></label><input type="number" id="bf-amount" placeholder="0"></div>
+  <div class="form-row col2">
+    <div class="form-group"><label class="form-label">사업금액 (만원)</label><input type="number" id="bf-budget" placeholder="0"></div>
+    <div class="form-group"><label class="form-label">계약금액 (만원) <span style="color:var(--text3);font-weight:400;">(수주 시 비워두면 제안가격 자동 적용)</span></label><input type="number" id="bf-amount" placeholder="0"></div>
+  </div>
   <div id="bf-competition-area">
     <div class="form-group"><label class="form-label">낙찰사 <span style="color:var(--text3);font-weight:400;">(비워두면 경쟁사 점수 합계 기준 자동 지정)</span></label><input type="text" id="bf-winner" placeholder="직접 입력 시 이 값이 우선 적용됩니다"></div>
     <div class="divider"></div>
@@ -1324,6 +1327,11 @@ function getBidActualItems(year, month){
 function parseCSV(text){text=text.replace(/^\uFEFF/,'');const lines=text.split(/\r?\n/).filter(l=>l.trim());const headers=splitLine(lines[0]).map(h=>h.trim().replace(/^"|"$/g,''));return lines.slice(1).map(line=>{const vals=splitLine(line);const obj={};headers.forEach((h,i)=>{obj[h]=(vals[i]||'').trim().replace(/^"|"$/g,'');});return obj;}).filter(row=>Object.values(row).some(v=>v!==''));}
 function splitLine(line){const res=[];let cur='';let inQ=false;for(let i=0;i<line.length;i++){if(line[i]==='"'){inQ=!inQ;}else if(line[i]===','&&!inQ){res.push(cur);cur='';}else cur+=line[i];}res.push(cur);return res;}
 function toNum(v){if(v===undefined||v===null||v==='')return null;const n=parseFloat(String(v).replace(/,/g,''));return isNaN(n)?null:n;}
+function calcProposalRate(amount,budget){
+  if(amount===undefined||amount===null||budget===undefined||budget===null)return null;
+  if(budget<=0)return null;
+  return amount/budget*100;
+}
 
 // ════════════════════════════════
 //  NORMALIZE
@@ -1337,7 +1345,7 @@ function normalizeBid(row){
   let 낙찰사='';if(결과==='수주')낙찰사='우리팀';else if(!isSole)낙찰사=(row['낙찰사']||'').trim();
   return{
     연도:row['연도']||'',사업명:row['사업명']||'',발주처:row['발주처']||'',사업분야:row['사업분야']||'',입찰일:row['입찰일']||'',
-    계약유형:isSole?'수의계약':'경쟁입찰',결과,계약금액:toNum(row['계약금액(만원)']),낙찰사,
+    계약유형:isSole?'수의계약':'경쟁입찰',결과,사업금액:toNum(row['사업금액(만원)']),계약금액:toNum(row['계약금액(만원)']),낙찰사,
     우리기술:isSole?null:toNum(row['우리팀_기술평가점수']),
     우리가격:isSole?null:toNum(row['우리팀_가격점수']),
     우리제안가:isSole?null:toNum(row['우리팀_제안가격(만원)']),
@@ -1558,7 +1566,7 @@ function openBidForm(idx){
   document.getElementById('bid-form-title').textContent=idx===undefined?'입찰 추가':'입찰 수정';
   if(idx===undefined){
     document.getElementById('bf-year').value=new Date().getFullYear();
-    ['bf-date','bf-name','bf-client','bf-field','bf-winner','bf-tech','bf-price','bf-propose','bf-pricemax','bf-amount'].forEach(id=>document.getElementById(id).value='');
+    ['bf-date','bf-name','bf-client','bf-field','bf-winner','bf-tech','bf-price','bf-propose','bf-pricemax','bf-budget','bf-amount'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('bf-type').value='경쟁입찰';
     document.getElementById('bf-result').value='입찰중';
     addCompBlock();
@@ -1571,6 +1579,7 @@ function openBidForm(idx){
     document.getElementById('bf-field').value=b.사업분야;
     document.getElementById('bf-type').value=b.계약유형;
     document.getElementById('bf-result').value=b.결과;
+    document.getElementById('bf-budget').value=b.사업금액||'';
     document.getElementById('bf-amount').value=b.계약금액||'';
     document.getElementById('bf-winner').value=b.낙찰사==='우리팀'?'':b.낙찰사||'';
     document.getElementById('bf-tech').value=b.우리기술||'';
@@ -1631,6 +1640,7 @@ function saveBid(){
 
   // ② 계약금액 자동 설정
   // - 수주이고 계약금액이 비어 있으면 → 우리팀 제안가격으로 자동 채움
+  const 사업금액=toNum(document.getElementById('bf-budget').value);
   const manualAmount=toNum(document.getElementById('bf-amount').value);
   const proposeAmt=isSole?null:toNum(document.getElementById('bf-propose').value);
   let 계약금액=manualAmount;
@@ -1644,7 +1654,7 @@ function saveBid(){
     사업분야:document.getElementById('bf-field').value.trim(),
     입찰일:document.getElementById('bf-date').value,
     계약유형:document.getElementById('bf-type').value,
-    결과:result,계약금액,낙찰사,
+    결과:result,사업금액,계약금액,낙찰사,
     우리기술:isSole?null:toNum(document.getElementById('bf-tech').value),
     우리가격:isSole?null:toNum(document.getElementById('bf-price').value),
     우리제안가:proposeAmt,
@@ -1880,6 +1890,7 @@ function renderBids(){
     <td>${b.발주처||'—'}</td>
     <td>${fieldBadge(b.사업분야)}</td>
     <td>${typeBadge(b.계약유형)}</td>
+    <td>${fmtMoney(b.사업금액)}</td>
     <td>${b.결과==='수주'?fmtMoney(b.계약금액):'—'}</td>
     <td>${sc(b,b.우리기술)}</td><td>${sc(b,b.우리가격)}</td>
     <td style="text-align:center;">${b.계약유형==='경쟁입찰'?`<strong>${b.competitors.length}</strong>`:'—'}</td>
@@ -1891,7 +1902,7 @@ function renderBids(){
       <button class="btn-icon" onclick="openBidForm(${ri})" title="수정">✏️</button>
       <button class="btn-icon del" onclick="deleteBid(${ri})" title="삭제">🗑</button>
     </div></td>
-  </tr>`;}).join(''):`<tr><td colspan="14" style="text-align:center;padding:24px;color:var(--text3);">데이터 없음 — 우측 상단 "＋ 입찰 추가"로 입력하세요</td></tr>`;
+  </tr>`;}).join(''):`<tr><td colspan="15" style="text-align:center;padding:24px;color:var(--text3);">데이터 없음 — 우측 상단 "＋ 입찰 추가"로 입력하세요</td></tr>`;
 
   // 모바일 카드형 렌더링
   const cardsEl=document.getElementById('bids-cards');
@@ -1911,7 +1922,7 @@ function renderBids(){
           ${b.사업분야?`<span>·</span>${fieldBadge(b.사업분야,true)}`:''}
         </div>
         <div class="bid-mobile-card-meta">
-          <span>계약금액: <strong style="color:var(--success);">${b.결과==='수주'?fmtMoney(b.계약금액):'—'}</strong></span>
+          <span>사업금액: <strong>${fmtMoney(b.사업금액)}</strong></span><span>·</span><span>계약금액: <strong style="color:var(--success);">${b.결과==='수주'?fmtMoney(b.계약금액):'—'}</strong></span>
           ${!isSole&&b.낙찰사?`<span>·</span><span>낙찰: ${winnerBadge(b.낙찰사,b.결과)}</span>`:''}
         </div>
         ${!isSole&&(b.우리기술!==null||b.우리가격!==null)?`<div class="bid-mobile-card-scores">
@@ -1953,6 +1964,7 @@ function openBidDetail(idx){
     <div><div class="text-sm text-muted">계약유형</div>${typeBadge(b.계약유형)}</div>
     <div><div class="text-sm text-muted">결과</div>${resultBadge(b.결과)}</div>
     <div><div class="text-sm text-muted">낙찰사</div>${winnerBadge(b.낙찰사,b.결과)}</div>
+    <div><div class="text-sm text-muted">사업금액</div><div class="fw">${fmtMoney(b.사업금액)}</div></div>
     <div><div class="text-sm text-muted">계약금액</div><div class="fw">${fmtMoney(b.계약금액)}</div></div>
     <div><div class="text-sm text-muted">경쟁사 수</div><div class="fw">${isSole?'—':b.competitors.length+'개사'}</div></div>
   </div>`;
@@ -1961,9 +1973,9 @@ function openBidDetail(idx){
     const ourTotal=(b.우리기술||0)+(b.우리가격||0);
     html+=`<div class="divider"></div>
     <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">📊 참여사 점수 비교</div>
-    <div style="overflow-x:auto;"><table class="comp-table"><thead><tr><th class="left">참여사</th><th>기술평가</th><th>가격점수</th><th>합계</th><th>추정 제안가</th><th>낙찰</th></tr></thead><tbody>
-    <tr class="our-row${b.낙찰사==='우리팀'?' winner-hl':''}"><td class="left"><strong>🏢 우리팀</strong></td><td>${fmtScore(b.우리기술)}</td><td>${fmtScore(b.우리가격)}</td><td><strong>${b.우리기술!==null||b.우리가격!==null?ourTotal.toFixed(2):'—'}</strong></td><td>${fmtMoney(b.우리제안가)}</td><td>${b.낙찰사==='우리팀'?'<span class="winner-chip">🏆</span>':''}</td></tr>
-    ${cwp.map(c=>{const isW=b.낙찰사===c.name;const tot=(c.기술||0)+(c.가격||0);return`<tr class="${isW?'winner-hl':''}"><td class="left"><strong>${c.name}</strong>${isW?` <span class="winner-chip" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.3);">낙찰</span>`:''}</td><td>${fmtScore(c.기술)}</td><td>${fmtScore(c.가격)}</td><td>${c.기술!==null||c.가격!==null?tot.toFixed(2):'—'}</td><td>${c.추정제안가!==null?fmtMoney(c.추정제안가):'—'}</td><td>${isW?'<span class="winner-chip" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.3);">낙찰</span>':''}</td></tr>`;}).join('')}
+    <div style="overflow-x:auto;"><table class="comp-table"><thead><tr><th class="left">참여사</th><th>기술평가</th><th>가격점수</th><th>합계</th><th>추정 제안가</th><th>사업금액 대비</th><th>낙찰</th></tr></thead><tbody>
+    <tr class="our-row${b.낙찰사==='우리팀'?' winner-hl':''}"><td class="left"><strong>🏢 우리팀</strong></td><td>${fmtScore(b.우리기술)}</td><td>${fmtScore(b.우리가격)}</td><td><strong>${b.우리기술!==null||b.우리가격!==null?ourTotal.toFixed(2):'—'}</strong></td><td>${fmtMoney(b.우리제안가)}</td><td>${fmtPct(calcProposalRate(b.우리제안가,b.사업금액))}</td><td>${b.낙찰사==='우리팀'?'<span class="winner-chip">🏆</span>':''}</td></tr>
+    ${cwp.map(c=>{const isW=b.낙찰사===c.name;const tot=(c.기술||0)+(c.가격||0);return`<tr class="${isW?'winner-hl':''}"><td class="left"><strong>${c.name}</strong>${isW?` <span class="winner-chip" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.3);">낙찰</span>`:''}</td><td>${fmtScore(c.기술)}</td><td>${fmtScore(c.가격)}</td><td>${c.기술!==null||c.가격!==null?tot.toFixed(2):'—'}</td><td>${c.추정제안가!==null?fmtMoney(c.추정제안가):'—'}</td><td>${fmtPct(calcProposalRate(c.추정제안가,b.사업금액))}</td><td>${isW?'<span class="winner-chip" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.3);">낙찰</span>':''}</td></tr>`;}).join('')}
     </tbody></table></div>`;
     // 점수 막대
     if(cwp.length>0){
@@ -1980,7 +1992,7 @@ function openBidDetail(idx){
         </div>`;
       });
     }
-    if(b.우리제안가){html+=`<div class="divider"></div><div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">💵 가격 역산</div><div class="grid2" style="gap:8px;margin-bottom:8px;"><div><div class="text-sm text-muted">우리팀 제안가</div><div style="font-size:18px;font-weight:700;">${fmtMoney(b.우리제안가)}</div></div><div><div class="text-sm text-muted">추정 최저가</div><div style="font-size:16px;font-weight:600;color:var(--warn);">${b.우리가격&&b.가격배점?fmtMoney(Math.round(b.우리제안가*b.우리가격/b.가격배점)):'—'}</div></div></div>${cwp.filter(c=>c.추정제안가!==null).map(c=>{const isW=b.낙찰사===c.name;return`<div class="calc-result" style="margin-bottom:6px;${isW?'border-color:rgba(239,68,68,.4);color:#ef4444;background:rgba(239,68,68,.06);':''}">🎯 <strong>${c.name}: ${fmtMoney(c.추정제안가)}</strong>${isW?' (낙찰사)':''}</div>`;}).join('')||'<div class="text-sm text-muted">경쟁사 가격 점수 데이터가 없습니다.</div>'}`;}
+    if(b.우리제안가){html+=`<div class="divider"></div><div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">💵 가격 역산</div><div class="grid2" style="gap:8px;margin-bottom:8px;"><div><div class="text-sm text-muted">우리팀 제안가</div><div style="font-size:18px;font-weight:700;">${fmtMoney(b.우리제안가)}</div><div class="text-sm text-muted" style="margin-top:4px;">사업금액 대비 ${fmtPct(calcProposalRate(b.우리제안가,b.사업금액))}</div></div><div><div class="text-sm text-muted">추정 최저가</div><div style="font-size:16px;font-weight:600;color:var(--warn);">${b.우리가격&&b.가격배점?fmtMoney(Math.round(b.우리제안가*b.우리가격/b.가격배점)):'—'}</div></div></div>${cwp.filter(c=>c.추정제안가!==null).map(c=>{const isW=b.낙찰사===c.name;return`<div class="calc-result" style="margin-bottom:6px;${isW?'border-color:rgba(239,68,68,.4);color:#ef4444;background:rgba(239,68,68,.06);':''}">🎯 <strong>${c.name}: ${fmtMoney(c.추정제안가)}</strong> · 사업금액 대비 ${fmtPct(calcProposalRate(c.추정제안가,b.사업금액))}${isW?' (낙찰사)':''}</div>`;}).join('')||'<div class="text-sm text-muted">경쟁사 가격 점수 데이터가 없습니다.</div>'}`;}
   }
   document.getElementById('detail-modal-body').innerHTML=html;
   openModal('bid-detail-modal');
@@ -2092,10 +2104,10 @@ function downloadTemplate(type){
   let csv,filename;
   if(type==='bids'){
     const ch=Array.from({length:MAX_COMP},(_,i)=>`경쟁사${i+1}명,경쟁사${i+1}_기술,경쟁사${i+1}_가격`).join(',');
-    csv=[`연도,사업명,발주처,사업분야,입찰일,계약유형,결과,계약금액(만원),낙찰사,우리팀_기술평가점수,우리팀_가격점수,우리팀_제안가격(만원),가격배점,${ch}`,
-    '2025,디지털 실태조사,행정안전부,실태조사,2025-03-15,경쟁입찰,수주,8500,우리팀,85.5,18.5,9000,20,A연구소,82.0,17.2,B기관,79.0,19.5,,,,,,,',
-    '2025,여론조사,국토교통부,여론조사,2025-06-01,경쟁입찰,탈락,,B기관,78.0,19.0,8200,20,A연구소,80.5,20.0,B기관,81.0,19.8,,,,,,,',
-    '2025,수의계약 예시,환경부,패널조사,2025-08-10,수의계약,수주,3200,,,,,,,,,,,,,,'].join('\n');
+    csv=[`연도,사업명,발주처,사업분야,입찰일,계약유형,결과,사업금액(만원),계약금액(만원),낙찰사,우리팀_기술평가점수,우리팀_가격점수,우리팀_제안가격(만원),가격배점,${ch}`,
+    '2025,디지털 실태조사,행정안전부,실태조사,2025-03-15,경쟁입찰,수주,10000,8500,우리팀,85.5,18.5,9000,20,A연구소,82.0,17.2,B기관,79.0,19.5,,,,,,,',
+    '2025,여론조사,국토교통부,여론조사,2025-06-01,경쟁입찰,탈락,9000,,B기관,78.0,19.0,8200,20,A연구소,80.5,20.0,B기관,81.0,19.8,,,,,,,',
+    '2025,수의계약 예시,환경부,패널조사,2025-08-10,수의계약,수주,3500,3200,,,,,,,,,,,,,,'].join('\n');
     filename='bids_template.csv';
   }else{
     csv=['컨택일,기관명,조사명,예상예산(만원),담당자,상태,비고','2025-04-05,행정안전부,디지털 격차 실태조사,8000,홍길동,검토중,미팅 예정','2025-05-20,교육부,학생 생활실태조사,5000,김철수,제안예정,','2025-07-01,복지부,복지패널,12000,이영희,수주연결,입찰 전환'].join('\n');
