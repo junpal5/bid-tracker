@@ -15,6 +15,22 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:var(--
 .sidebar-logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:12px}
 .sidebar-logo h1{font-size:15px;font-weight:700;color:var(--text);line-height:1.4}
 .sidebar-logo span{font-size:11px;color:var(--text3)}
+.sidebar-footer{margin-top:auto;padding:18px 20px 0;border-top:1px solid var(--border);display:grid;gap:10px}
+.sidebar-footer-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+.sidebar-footer-value{font-size:12px;color:var(--text2);line-height:1.45}
+.sidebar-version-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:rgba(79,124,255,.06);color:var(--text);font:inherit;cursor:pointer;transition:all .15s}
+.sidebar-version-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(79,124,255,.1)}
+.sidebar-version-btn strong{font-size:13px;font-weight:700}
+.sidebar-version-btn span:last-child{font-size:12px;color:var(--text3)}
+.version-history-list{display:grid;gap:12px}
+.version-history-item{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.version-history-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.version-history-version{font-size:15px;font-weight:800;color:var(--text)}
+.version-history-date{font-size:12px;color:var(--text3)}
+.version-history-changes{display:grid;gap:6px;padding-left:18px;color:var(--text2);font-size:13px}
+.version-history-changes li{line-height:1.5}
+.version-inline-grid{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:12px}
+.version-help{font-size:12px;color:var(--text3);line-height:1.5}
 .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text2);border-left:3px solid transparent;transition:all .2s}
 .nav-item:hover{color:var(--text);background:rgba(79,124,255,.07)}
 .nav-item.active{color:var(--accent);background:rgba(79,124,255,.1);border-left-color:var(--accent)}
@@ -166,7 +182,7 @@ textarea{resize:vertical;min-height:60px}
 .comp-table tr.winner-hl td{background:rgba(245,158,11,.07)}
 @media(max-width:900px){
   .sidebar{width:60px}
-  .sidebar-logo,.nav-item span{display:none}
+  .sidebar-logo,.nav-item span,.sidebar-footer{display:none}
   .main{margin-left:60px;padding:20px 16px}
   .grid4,.grid5{grid-template-columns:1fr 1fr}
   .grid3{grid-template-columns:1fr 1fr}
@@ -191,6 +207,7 @@ textarea{resize:vertical;min-height:60px}
   .page-header-actions{width:100%;margin-left:0;justify-content:flex-start}
   .app-sync-indicator-root{justify-content:flex-start;margin-bottom:10px;min-height:0}
   .app-sync-indicator{padding:8px 12px;font-size:11px}
+  .version-inline-grid{grid-template-columns:1fr}
 
   /* stat 카드 — 더 크게 */
   .stat-card{padding:16px 14px}
@@ -327,6 +344,19 @@ textarea{resize:vertical;min-height:60px}
   <div class="nav-item" data-page="contacts"><span class="nav-icon">📞</span><span>컨택 건수</span></div>
   <div class="nav-item" data-page="costs" onclick="tryOpenCosts(event)"><span class="nav-icon">📊</span><span>프로젝트별 비용률</span></div>
   <div class="nav-item" data-page="data" onclick="tryOpenData(event)"><span class="nav-icon">⚙️</span><span>데이터 관리</span></div>
+  <div class="sidebar-footer">
+    <div>
+      <div class="sidebar-footer-label">최종 수정일</div>
+      <div class="sidebar-footer-value" id="sidebar-last-update">—</div>
+    </div>
+    <div>
+      <div class="sidebar-footer-label">버전</div>
+      <button type="button" class="sidebar-version-btn" onclick="openVersionHistoryModal()">
+        <strong id="sidebar-version-name">v1.0.0</strong>
+        <span>히스토리 보기</span>
+      </button>
+    </div>
+  </div>
 </nav>
 
 <!-- 모바일 상단 헤더 -->
@@ -653,6 +683,34 @@ textarea{resize:vertical;min-height:60px}
     </div>
   </div>
 
+  <div class="section-title">버전 관리</div>
+  <div class="card mb16">
+    <div class="version-inline-grid">
+      <div>
+        <div class="card-title" style="margin-bottom:10px;">현재 버전</div>
+        <div style="font-size:28px;font-weight:800;line-height:1;" id="data-current-version">v1.0.0</div>
+        <div class="text-sm text-muted mt16">마지막 등록: <span id="data-version-date">—</span></div>
+        <button class="btn btn-outline mt16" type="button" onclick="openVersionHistoryModal()">버전 히스토리 보기</button>
+      </div>
+      <div>
+        <div class="form-group">
+          <label class="form-label">다음 버전명</label>
+          <input type="text" id="version-name-input" placeholder="v1.0.1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">수정사항</label>
+          <textarea id="version-change-input" placeholder="한 줄에 하나씩 입력하세요. 예) 저장 상태 배지 추가"></textarea>
+        </div>
+        <div class="version-help mb16">버전명은 현재 버전 기준으로 자동 추천됩니다. 수정사항은 한 줄씩 직접 정리한 뒤 버전 등록을 누르면 <code>version-history.json</code>만 GitHub에 저장됩니다.</div>
+        <div class="flex gap8" style="flex-wrap:wrap;">
+          <button class="btn btn-primary" type="button" onclick="saveVersionHistory()">버전 등록</button>
+          <button class="btn btn-outline" type="button" onclick="prefillNextVersion(true)">버전명 다시 추천</button>
+        </div>
+        <div id="data-version-status" class="text-sm text-muted mt16"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- CSV 업로드 -->
   <div class="section-title">CSV 업로드 (일괄 등록)</div>
   <div class="grid2 mb16">
@@ -972,6 +1030,13 @@ textarea{resize:vertical;min-height:60px}
 </div>
 </div>
 
+<div class="modal-overlay hidden" id="version-history-modal">
+<div class="modal">
+  <h3><span>🗂 버전 히스토리</span><button class="modal-close" onclick="closeModal('version-history-modal')">✕</button></h3>
+  <div id="version-history-modal-body"></div>
+</div>
+</div>
+
 <script>
 // ════════════════════════════════
 //  DATA STORE
@@ -979,6 +1044,7 @@ textarea{resize:vertical;min-height:60px}
 //  월별 실적은 bids에서 자동 계산
 // ════════════════════════════════
 let DB={bids:[],revenue:[],contacts:[],costs:[],meta:{lastUpdate:null,costPw:null,dataPw:null}};
+let VERSION_DATA={currentVersion:'v1.0.0',history:[]};
 const charts={};
 const MAX_COMP=10;
 const COST_PW_KEY='cost_pw';
@@ -993,6 +1059,7 @@ function getCostPw(){ensureMeta();return DB.meta.costPw||localStorage.getItem(CO
 const DATA_PW_KEY='data_pw';
 const DATA_PW_DEFAULT='1205';
 const BID_NAME_WIDTH_KEY='bid_name_col_width';
+const VERSION_LS_KEY='dashboard_version_history';
 function getDataPw(){ensureMeta();return DB.meta.dataPw||localStorage.getItem(DATA_PW_KEY)||DATA_PW_DEFAULT;}
 function getBidNameColWidth(){return parseInt(localStorage.getItem(BID_NAME_WIDTH_KEY)||'220',10);}
 function syncSharedPasswords(){
@@ -1188,10 +1255,15 @@ const GH={
   owner:'junpal5',
   repo:'bid-tracker',
   file:'data.json',
+  versionFile:'version-history.json',
   branch:'main',
   get token(){return localStorage.getItem('gh_token')||'';},
-  get apiUrl(){return`https://api.github.com/repos/${this.owner}/${this.repo}/contents/${this.file}`;},
-  get rawUrl(){return`https://raw.githubusercontent.com/${this.owner}/${this.repo}/${this.branch}/${this.file}?t=`+Date.now();}
+  getApiUrl(file){return`https://api.github.com/repos/${this.owner}/${this.repo}/contents/${file}`;},
+  getRawUrl(file){return`https://raw.githubusercontent.com/${this.owner}/${this.repo}/${this.branch}/${file}?t=`+Date.now();},
+  get apiUrl(){return this.getApiUrl(this.file);},
+  get rawUrl(){return this.getRawUrl(this.file);},
+  get versionApiUrl(){return this.getApiUrl(this.versionFile);},
+  get versionRawUrl(){return this.getRawUrl(this.versionFile);}
 };
 
 // ════════════════════════════════
@@ -1215,13 +1287,97 @@ async function loadDataJSON(){
     console.warn('GitHub 로드 실패, localStorage 사용:', e.message);
   }
 }
+function ensureVersionData(){
+  if(!VERSION_DATA||typeof VERSION_DATA!=='object')VERSION_DATA={};
+  if(typeof VERSION_DATA.currentVersion!=='string'||!VERSION_DATA.currentVersion.trim())VERSION_DATA.currentVersion='v1.0.0';
+  if(!Array.isArray(VERSION_DATA.history))VERSION_DATA.history=[];
+  VERSION_DATA.history=VERSION_DATA.history.map(item=>{
+    const version=(item&&typeof item.version==='string'&&item.version.trim())?item.version.trim():'v1.0.0';
+    const date=item&&item.date?item.date:new Date().toISOString();
+    const changes=Array.isArray(item&&item.changes)?item.changes.filter(Boolean).map(v=>String(v).trim()).filter(Boolean):[];
+    return {version,date,changes};
+  });
+  if(VERSION_DATA.history.length)VERSION_DATA.currentVersion=VERSION_DATA.history[0].version||VERSION_DATA.currentVersion;
+}
+function loadVersionLS(){
+  try{const raw=localStorage.getItem(VERSION_LS_KEY);if(!raw)return;VERSION_DATA=JSON.parse(raw);ensureVersionData();}catch(e){}
+}
+function saveVersionLS(){
+  ensureVersionData();
+  localStorage.setItem(VERSION_LS_KEY,JSON.stringify(VERSION_DATA));
+}
+function formatVersionDate(value){
+  if(!value)return '-';
+  const d=new Date(value);
+  return Number.isNaN(d.getTime())?'-':d.toLocaleString('ko-KR');
+}
+function suggestNextVersion(version){
+  const current=(version||VERSION_DATA.currentVersion||'v1.0.0').trim();
+  const match=current.match(/^(v)?(\d+)\.(\d+)\.(\d+)$/i);
+  if(!match)return 'v1.0.1';
+  return `${match[1]||'v'}${match[2]}.${match[3]}.${parseInt(match[4],10)+1}`;
+}
+function prefillNextVersion(force=false){
+  ensureVersionData();
+  const input=document.getElementById('version-name-input');
+  if(input&&(force||!input.value.trim()))input.value=suggestNextVersion(VERSION_DATA.currentVersion);
+}
+function refreshVersionUI(){
+  ensureVersionData();
+  const latest=VERSION_DATA.history[0]||null;
+  const sidebarLast=document.getElementById('sidebar-last-update');
+  const sidebarVersion=document.getElementById('sidebar-version-name');
+  const dataCurrent=document.getElementById('data-current-version');
+  const dataDate=document.getElementById('data-version-date');
+  if(sidebarLast)sidebarLast.textContent=DB.meta&&DB.meta.lastUpdate?formatVersionDate(DB.meta.lastUpdate):'-';
+  if(sidebarVersion)sidebarVersion.textContent=VERSION_DATA.currentVersion||'v1.0.0';
+  if(dataCurrent)dataCurrent.textContent=VERSION_DATA.currentVersion||'v1.0.0';
+  if(dataDate)dataDate.textContent=latest?formatVersionDate(latest.date):'-';
+  prefillNextVersion();
+}
+function renderVersionHistory(){
+  ensureVersionData();
+  const body=document.getElementById('version-history-modal-body');
+  if(!body)return;
+  if(!VERSION_DATA.history.length){
+    body.innerHTML='<div class="empty"><div class="empty-icon">📝</div><p>등록된 버전 히스토리가 없습니다.</p></div>';
+    return;
+  }
+  body.innerHTML=`<div class="version-history-list">${VERSION_DATA.history.map(item=>`<div class="version-history-item"><div class="version-history-top"><div><div class="version-history-version">${item.version}</div><div class="version-history-date">${formatVersionDate(item.date)}</div></div></div>${item.changes.length?`<ul class="version-history-changes">${item.changes.map(change=>`<li>${change}</li>`).join('')}</ul>`:'<div class="text-sm text-muted">수정사항이 아직 입력되지 않았습니다.</div>'}</div>`).join('')}</div>`;
+}
+function openVersionHistoryModal(){
+  renderVersionHistory();
+  openModal('version-history-modal');
+}
+function setVersionStatus(message,type='ready'){
+  const el=document.getElementById('data-version-status');
+  if(!el)return;
+  const color=type==='error'?'var(--danger)':type==='success'?'var(--success)':type==='saving'?'var(--warn)':'var(--text3)';
+  el.innerHTML=`<span style="color:${color};">${message}</span>`;
+}
+async function loadVersionHistory(){
+  try{
+    const res=await fetch(GH.versionRawUrl);
+    if(!res.ok)throw new Error('version-history.json 불러오기 실패');
+    VERSION_DATA=await res.json();
+    ensureVersionData();
+    saveVersionLS();
+  }catch(e){
+    loadVersionLS();
+    ensureVersionData();
+  }
+  refreshVersionUI();
+  renderVersionHistory();
+}
 function loadLS(){
   try{const d=localStorage.getItem('dashboard_db');if(!d)return;const p=JSON.parse(d);if(p.bids)DB.bids=p.bids;if(p.revenue)DB.revenue=p.revenue;if(p.contacts)DB.contacts=p.contacts||[];if(p.costs)DB.costs=p.costs||[];if(p.meta)DB.meta=p.meta;ensureMeta();}catch(e){}
+  refreshVersionUI();
 }
 function saveLS(){
   ensureMeta();
   DB.meta.lastUpdate=new Date().toISOString();
   localStorage.setItem('dashboard_db',JSON.stringify(DB));
+  refreshVersionUI();
   if(GH.token){
     ghChangeSeq++;
     setAppSyncIndicator('saving');
@@ -1230,6 +1386,7 @@ function saveLS(){
     setAppSyncIndicator('idle');
   }
 }
+
 
 // ════════════════════════════════
 //  GITHUB 저장 함수
@@ -1295,6 +1452,19 @@ function scheduleAppSyncIdle(){
   },1800);
 }
 
+async function putGitHubJSON(file,payload,message){
+  const url=GH.getApiUrl(file);
+  const infoRes=await fetch(url,{headers:{'Authorization':'token '+GH.token,'Accept':'application/vnd.github.v3+json'}});
+  let sha;
+  if(infoRes.ok){const info=await infoRes.json();sha=info.sha;}
+  else if(infoRes.status!==404){throw new Error('SHA 조회 실패 (토큰 또는 저장소 확인 필요)');}
+  const body={message,content:btoa(unescape(encodeURIComponent(JSON.stringify(payload,null,2)))),branch:GH.branch};
+  if(sha)body.sha=sha;
+  const putRes=await fetch(url,{method:'PUT',headers:{'Authorization':'token '+GH.token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!putRes.ok){const err=await putRes.json().catch(()=>({}));throw new Error(err.message||'저장 실패');}
+  return putRes.json();
+}
+
 async function saveToGitHub(){
   clearTimeout(ghSaveTimer);
   ghSaveTimer=setTimeout(async()=>{
@@ -1305,28 +1475,9 @@ async function saveToGitHub(){
     }
     ghSaving=true;
     const seq=ghChangeSeq;
-    const snapshot=JSON.stringify(DB,null,2);
     updateGhStatus('saving');
     try{
-      const infoRes=await fetch(GH.apiUrl,{
-        headers:{'Authorization':'token '+GH.token,'Accept':'application/vnd.github.v3+json'}
-      });
-      if(!infoRes.ok) throw new Error('SHA 조회 실패 (토큰 또는 저장소 확인 필요)');
-      const info=await infoRes.json();
-      const sha=info.sha;
-      const content=btoa(unescape(encodeURIComponent(snapshot)));
-      const putRes=await fetch(GH.apiUrl,{
-        method:'PUT',
-        headers:{'Authorization':'token '+GH.token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-        body:JSON.stringify({
-          message:`dashboard: data update ${new Date().toLocaleString('ko-KR')}`,
-          content,sha,branch:GH.branch
-        })
-      });
-      if(!putRes.ok){
-        const err=await putRes.json();
-        throw new Error(err.message||'저장 실패');
-      }
+      await putGitHubJSON(GH.file, DB, `dashboard: data update ${new Date().toLocaleString('ko-KR')}`);
       ghSyncedSeq=Math.max(ghSyncedSeq, seq);
       updateGhStatus('saved');
     }catch(e){
@@ -1342,6 +1493,46 @@ async function saveToGitHub(){
       }
     }
   },1500);
+}
+
+async function saveVersionHistory(){
+  ensureVersionData();
+  const versionInput=document.getElementById('version-name-input');
+  const changesInput=document.getElementById('version-change-input');
+  const nextVersion=versionInput?versionInput.value.trim():'';
+  const changes=(changesInput?changesInput.value:'').split(/?
+/).map(v=>v.trim()).filter(Boolean);
+  if(!nextVersion){setVersionStatus('버전명을 입력해 주세요.','error');return;}
+  if(nextVersion===VERSION_DATA.currentVersion){setVersionStatus('현재 버전과 다른 버전명을 입력해 주세요.','error');return;}
+  if(!changes.length){setVersionStatus('수정사항을 한 줄 이상 입력해 주세요.','error');return;}
+  const entry={version:nextVersion,date:new Date().toISOString(),changes};
+  VERSION_DATA.history=[entry,...VERSION_DATA.history.filter(item=>item.version!==nextVersion)];
+  VERSION_DATA.currentVersion=nextVersion;
+  saveVersionLS();
+  refreshVersionUI();
+  renderVersionHistory();
+  setVersionStatus('버전 히스토리 저장 중...','saving');
+  if(GH.token){
+    try{
+      setAppSyncIndicator('saving');
+      updateGhStatus('saving');
+      await putGitHubJSON(GH.versionFile, VERSION_DATA, `dashboard: version ${nextVersion}`);
+      updateGhStatus('saved');
+      setAppSyncIndicator('saved');
+      scheduleAppSyncIdle();
+      setVersionStatus('version-history.json 저장 완료','success');
+    }catch(e){
+      updateGhStatus('error', e.message);
+      setAppSyncIndicator('error');
+      setVersionStatus('버전 저장 실패: '+e.message,'error');
+      return;
+    }
+  }else{
+    setVersionStatus('로컬에만 저장되었습니다. GitHub 자동 저장을 쓰려면 토큰을 설정해 주세요.');
+  }
+  if(changesInput)changesInput.value='';
+  if(versionInput)versionInput.value=suggestNextVersion(nextVersion);
+  showToast('버전 히스토리 저장 완료','success');
 }
 
 function updateGhStatus(state, msg){
@@ -2217,11 +2408,13 @@ function updateDataSummary(){
   document.getElementById('data-rev-count').textContent=DB.revenue.length;
   document.getElementById('data-ct-count').textContent=DB.contacts.length;
   document.getElementById('data-last-update').textContent=DB.meta.lastUpdate?new Date(DB.meta.lastUpdate).toLocaleString('ko-KR'):'—';
-  // 토큰 상태 표시
   const dispEl=document.getElementById('gh-token-display');
   if(dispEl) dispEl.textContent=GH.token?'ghp_••••••••••••••••••••':'미설정';
+  if(!document.getElementById('data-version-status')?.textContent.trim())setVersionStatus('버전명은 자동 추천됩니다. 수정사항만 입력한 뒤 등록해 주세요.');
+  refreshVersionUI();
   updateGhStatus(GH.token?(ghSaving||ghSyncedSeq<ghChangeSeq?'saving':'ready'):'none');
 }
+
 
 // ════════════════════════════════
 //  DRAG & DROP
@@ -2406,7 +2599,7 @@ function renderCosts(){
 }
 
 function renderPage(n){if(n==='home')renderHome();else if(n==='bids')renderBids();else if(n==='competitor')renderCompetitor();else if(n==='revenue')renderRevenue();else if(n==='contacts')renderContacts();else if(n==='costs')renderCosts();else if(n==='data')updateDataSummary();}
-(async()=>{setBidNameColWidth(getBidNameColWidth());loadLS();await loadDataJSON();const pwChanged=syncSharedPasswords();if(pwChanged)saveLS();refreshFilters();renderPage('home');updateDataSummary();mountAppSyncIndicator();})();
+(async()=>{setBidNameColWidth(getBidNameColWidth());loadLS();loadVersionLS();await loadDataJSON();await loadVersionHistory();const pwChanged=syncSharedPasswords();if(pwChanged)saveLS();refreshFilters();renderPage('home');updateDataSummary();mountAppSyncIndicator();})();
 </script>
 </body>
 </html>
