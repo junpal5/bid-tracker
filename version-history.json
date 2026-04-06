@@ -1,6 +1,13 @@
 {
-  "currentVersion": "v1.0.1",
+  "currentVersion": "v1.1.0",
   "history": [
+    {
+      "version": "v1.1.0",
+      "date": "2026-04-06T01:40:33.497Z",
+      "changes": [
+        "글래스모피즘 디자인 적용"
+      ]
+    },
     {
       "version": "v1.0.1",
       "date": "2026-04-03T10:12:10.457Z",
