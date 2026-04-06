@@ -328,6 +328,56 @@ textarea{resize:vertical;min-height:60px}
 }
 
 </style>
+<style id="glassmorphism-override">
+:root{--bg:#edf2f7;--bg2:rgba(228,235,242,.66);--bg3:rgba(238,243,248,.78);--card:rgba(255,255,255,.58);--card2:rgba(244,247,250,.86);--border:rgba(255,255,255,.58);--border2:rgba(198,208,220,.76);--accent:#445d78;--accent2:#60758c;--accent3:#6f8d88;--success:#4c7b6d;--danger:#9a6670;--warn:#9f8554;--indigo:#5f728e;--pink:#9d7886;--text:#1f2c38;--text2:#536474;--text3:#7c8b99;--radius:20px;--radius2:12px;--glass-shadow:0 20px 44px rgba(88,109,132,.12)}
+body{background:radial-gradient(circle at 16% 10%,rgba(255,255,255,.92),transparent 22%),radial-gradient(circle at 84% 12%,rgba(223,231,239,.78),transparent 24%),linear-gradient(145deg,#f7f9fb 0%,#eaf0f5 46%,#dfe7ef 100%);position:relative}
+body::before,body::after{content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(18px);opacity:.8}
+body::before{width:360px;height:360px;left:-130px;top:24px;background:radial-gradient(circle,rgba(255,255,255,.94),transparent 68%)}
+body::after{width:420px;height:420px;right:-180px;bottom:-170px;background:radial-gradient(circle,rgba(220,229,238,.78),transparent 72%)}
+.app{position:relative;z-index:1}
+.sidebar,.mobile-header,.mobile-tabbar,.app-sync-indicator,.toast,.modal{backdrop-filter:blur(24px) saturate(125%);-webkit-backdrop-filter:blur(24px) saturate(125%)}
+.sidebar{background:linear-gradient(180deg,rgba(235,240,245,.7),rgba(223,231,239,.58));border-right:1px solid rgba(255,255,255,.56);box-shadow:var(--glass-shadow)}
+.nav-item{color:var(--text2)}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.34)}
+.nav-item.active{color:var(--accent);background:linear-gradient(90deg,rgba(255,255,255,.68),rgba(232,238,244,.3));box-shadow:inset 0 1px 0 rgba(255,255,255,.72)}
+.sidebar-version-btn,.tab-btn,.btn-outline,.btn-icon,select,input[type=text],input[type=number],input[type=date],textarea,.bid-mobile-card,.comp-block,.comp-score-stat{background:rgba(255,255,255,.36);border-color:rgba(255,255,255,.58);box-shadow:inset 0 1px 0 rgba(255,255,255,.82)}
+.card,.stat-card,.summary-card,.score-compare-trigger,.version-history-item{background:linear-gradient(145deg,rgba(255,255,255,.7),rgba(244,247,250,.36));border:1px solid rgba(255,255,255,.62);box-shadow:var(--glass-shadow),inset 0 1px 0 rgba(255,255,255,.84);backdrop-filter:blur(20px) saturate(125%);-webkit-backdrop-filter:blur(20px) saturate(125%)}
+.stat-card{overflow:hidden}
+.stat-card::after{content:'';position:absolute;left:1px;right:1px;top:1px;height:44%;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.52),rgba(255,255,255,0));pointer-events:none}
+.summary-card:hover,.score-compare-trigger:hover{transform:translateY(-1px);box-shadow:0 18px 34px rgba(104,124,146,.12),inset 0 1px 0 rgba(255,255,255,.88)}
+.page-header-left h2,.sidebar-logo h1,.version-history-version,.modal h3,.section-title,.fw,.stat-value{color:var(--text)}
+.page-header-left p,.card-title,.stat-label,.stat-sub,.text-muted,.filter-label,.sidebar-logo span,.sidebar-footer-label,.version-history-date,.score-compare-meta{color:var(--text3)}
+.sidebar-footer-value,.version-history-changes,.form-label{color:var(--text2)}
+.card-title,.stat-label,.filter-label,.sidebar-footer-label{letter-spacing:.1em}
+th,.comp-table th{background:rgba(255,255,255,.48);color:#758595;border-bottom:1px solid rgba(255,255,255,.54)}
+td,.comp-table td{border-bottom:1px solid rgba(188,201,214,.2);color:var(--text)}
+tr:hover td{background:rgba(255,255,255,.22)}
+.badge-success{background:rgba(76,123,109,.1);color:var(--success)}
+.badge-danger{background:rgba(154,102,112,.1);color:var(--danger)}
+.badge-warn{background:rgba(159,133,84,.12);color:var(--warn)}
+.badge-blue{background:rgba(68,93,120,.1);color:var(--accent)}
+.badge-purple,.badge-indigo{background:rgba(95,114,142,.1);color:var(--indigo)}
+.badge-pink{background:rgba(157,120,134,.1);color:var(--pink)}
+.badge-teal{background:rgba(111,141,136,.1);color:var(--accent3)}
+.winner-chip{background:rgba(159,133,84,.1);color:#866f47;border-color:rgba(159,133,84,.18)}
+.btn-primary{background:linear-gradient(135deg,#4e657e,#657b90);color:#f8fbff;box-shadow:0 8px 18px rgba(90,111,132,.14)}
+.btn-primary:hover{filter:brightness(1.02);transform:translateY(-1px)}
+.btn-danger{background:linear-gradient(135deg,#a56e78,#935e69);color:#fff}
+.tab-btn{color:var(--text2)}
+.tab-btn.active{background:linear-gradient(135deg,#4e657e,#657b90);border-color:rgba(92,114,138,.7);color:#f8fbff;box-shadow:0 8px 18px rgba(90,111,132,.12)}
+.filter-search:focus,select:focus,input:focus,textarea:focus,.btn-outline:hover,.btn-icon:hover{border-color:#9cadbc}
+.btn-outline:hover,.btn-icon:hover{color:var(--accent);background:rgba(255,255,255,.48)}
+.upload-zone{background:rgba(255,255,255,.3);border:2px dashed rgba(188,201,214,.54);backdrop-filter:blur(16px)}
+.upload-zone:hover,.upload-zone.drag-over{background:rgba(255,255,255,.44)}
+.modal-overlay{background:radial-gradient(circle at top,rgba(247,250,252,.46),rgba(150,166,184,.16));backdrop-filter:blur(10px)}
+.modal{background:linear-gradient(160deg,rgba(250,252,254,.78),rgba(235,241,246,.62));border:1px solid rgba(255,255,255,.66);box-shadow:0 22px 58px rgba(104,124,146,.14),inset 0 1px 0 rgba(255,255,255,.88)}
+.mobile-header{background:linear-gradient(180deg,rgba(237,242,247,.82),rgba(225,232,239,.64));border-bottom:1px solid rgba(255,255,255,.56)}
+.mobile-tabbar{background:linear-gradient(180deg,rgba(237,242,247,.74),rgba(223,231,239,.92));border-top:1px solid rgba(255,255,255,.56)}
+.app-sync-indicator{background:linear-gradient(135deg,rgba(250,252,254,.84),rgba(233,239,245,.66));border:1px solid rgba(255,255,255,.62);color:var(--text)}
+.toast{background:linear-gradient(145deg,rgba(250,252,254,.88),rgba(234,240,246,.76));border:1px solid rgba(255,255,255,.62);color:var(--text)}
+.score-bar-track{background:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.46)}
+.section-title::after,.divider{background:rgba(182,195,209,.28)}
+</style>
 </head>
 <body>
 <div class="app">
@@ -1262,6 +1312,8 @@ const GH={
 async function loadDataJSON(){
   // 1단계: 같은 폴더의 data.json 시도 (로컬 파일 / GitHub Pages)
   try{
+    const canFetchLocal = location.protocol !== 'file:';
+    if(!canFetchLocal) throw new Error('Local file mode blocks fetch for ./data.json');
     const localRes=await fetch('./data.json?t='+Date.now());
     if(localRes.ok){
       const j=await localRes.json();
