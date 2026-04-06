@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -253,7 +253,7 @@ textarea{resize:vertical;min-height:60px}
   .modal{max-width:100%;width:100%;border-radius:var(--radius) var(--radius) 0 0;max-height:92vh;padding:20px 16px}
   .modal-sm{max-width:100%}
   .comp-score-sheet{height:calc(100vh - 24px - env(safe-area-inset-top,0px));max-height:calc(100vh - 24px - env(safe-area-inset-top,0px));padding:16px 14px calc(18px + 68px + env(safe-area-inset-bottom,0px))}
-  .comp-score-sheet .modal-header{position:sticky;top:0;background:var(--bg2);z-index:2;padding-top:2px}
+  .comp-score-sheet .modal-header{position:sticky;top:0;z-index:2;padding:18px 14px 14px;margin:-16px -14px 0;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(244,247,250,.58));backdrop-filter:blur(24px) saturate(125%);-webkit-backdrop-filter:blur(24px) saturate(125%);border-bottom:1px solid rgba(255,255,255,.58)}
   .comp-score-sheet-body{padding-bottom:24px}
   .comp-score-price-grid{grid-template-columns:1fr}
   .form-row.col2,.form-row.col3{grid-template-columns:1fr}
@@ -268,8 +268,15 @@ textarea{resize:vertical;min-height:60px}
   .score-compare-trigger{padding:14px}
 
   /* 홈 최근 입찰 — 컬럼 일부 숨김 */
-  #home-recent-tbody tr td:nth-child(3),
-  #home-recent-tbody tr td:nth-child(5){display:none}
+    #page-home .table-wrap table{min-width:860px}
+  #page-revenue .table-wrap table,
+  #page-contacts .table-wrap table{min-width:780px}
+  #page-home .table-wrap th,
+  #page-home .table-wrap td,
+  #page-revenue .table-wrap th,
+  #page-revenue .table-wrap td,
+  #page-contacts .table-wrap th,
+  #page-contacts .table-wrap td{white-space:nowrap;writing-mode:horizontal-tb;word-break:keep-all}
 
   /* 버튼 */
   .btn{font-size:13px;padding:9px 16px}
@@ -785,7 +792,7 @@ tr:hover td{background:rgba(255,255,255,.22)}
   <p class="text-sm text-muted mb16">프로젝트별 비용률 탭은 비밀번호로 보호되어 있습니다.</p>
   <div class="form-group">
     <label class="form-label">비밀번호</label>
-    <input type="password" id="cost-pw-input" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')verifyCostPw()">
+    <input type="password" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" id="cost-pw-input" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')verifyCostPw()">
   </div>
   <div id="cost-pw-error" style="color:var(--danger);font-size:12px;margin-top:-8px;margin-bottom:8px;display:none;">비밀번호가 틀렸습니다.</div>
   <div class="modal-footer">
@@ -802,7 +809,7 @@ tr:hover td{background:rgba(255,255,255,.22)}
   <p class="text-sm text-muted mb16">데이터 관리 탭은 비밀번호로 보호되어 있습니다.</p>
   <div class="form-group">
     <label class="form-label">비밀번호</label>
-    <input type="password" id="data-pw-input" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')verifyDataPw()">
+    <input type="password" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" id="data-pw-input" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')verifyDataPw()">
   </div>
   <div id="data-pw-error" style="color:var(--danger);font-size:12px;margin-top:-8px;margin-bottom:8px;display:none;">비밀번호가 틀렸습니다.</div>
   <div class="modal-footer">
@@ -818,15 +825,15 @@ tr:hover td{background:rgba(255,255,255,.22)}
   <h3><span>🔒 비밀번호 변경</span><button class="modal-close" onclick="closeModal('data-pw-change-modal')">✕</button></h3>
   <div class="form-group">
     <label class="form-label">현재 비밀번호</label>
-    <input type="password" id="data-pw-old" placeholder="현재 비밀번호">
+    <input type="password" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" id="data-pw-old" placeholder="현재 비밀번호">
   </div>
   <div class="form-group">
     <label class="form-label">새 비밀번호</label>
-    <input type="password" id="data-pw-new" placeholder="새 비밀번호">
+    <input type="password" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" id="data-pw-new" placeholder="새 비밀번호">
   </div>
   <div class="form-group">
     <label class="form-label">새 비밀번호 확인</label>
-    <input type="password" id="data-pw-new2" placeholder="새 비밀번호 재입력">
+    <input type="password" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" id="data-pw-new2" placeholder="새 비밀번호 재입력">
   </div>
   <div id="data-pw-change-error" style="color:var(--danger);font-size:12px;margin-bottom:8px;display:none;"></div>
   <div class="modal-footer">
@@ -842,15 +849,15 @@ tr:hover td{background:rgba(255,255,255,.22)}
   <h3><span>🔒 비밀번호 변경</span><button class="modal-close" onclick="closeModal('cost-pw-change-modal')">✕</button></h3>
   <div class="form-group">
     <label class="form-label">현재 비밀번호</label>
-    <input type="password" id="cost-pw-old" placeholder="현재 비밀번호">
+    <input type="password" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" id="cost-pw-old" placeholder="현재 비밀번호">
   </div>
   <div class="form-group">
     <label class="form-label">새 비밀번호</label>
-    <input type="password" id="cost-pw-new" placeholder="새 비밀번호">
+    <input type="password" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" id="cost-pw-new" placeholder="새 비밀번호">
   </div>
   <div class="form-group">
     <label class="form-label">새 비밀번호 확인</label>
-    <input type="password" id="cost-pw-new2" placeholder="새 비밀번호 재입력">
+    <input type="password" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" id="cost-pw-new2" placeholder="새 비밀번호 재입력">
   </div>
   <div id="cost-pw-change-error" style="color:var(--danger);font-size:12px;margin-bottom:8px;display:none;"></div>
   <div class="modal-footer">
