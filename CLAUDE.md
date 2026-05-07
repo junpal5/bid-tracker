@@ -62,12 +62,25 @@ git push origin main
 
 ## Push 인증 설정
 
-git remote URL에 PAT가 포함되어 있어 별도 인증 없이 push 가능하다.
-PAT가 만료되거나 갱신된 경우 아래 명령으로 업데이트한다:
+### 세션 시작 시 필수 절차
+
+Claude Code는 세션이 초기화될 때마다 인증 정보가 사라진다.
+따라서 **새 세션에서 bid-tracker 작업 시작 시, 사용자가 아래 형식으로 PAT를 전달해야 한다:**
+
+> "bid-tracker 작업할게. PAT: `ghp_xxxx`"
+
+PAT를 받으면 즉시 아래 명령으로 git remote에 설정한 뒤 작업을 시작한다:
 
 ```bash
-git remote set-url origin https://junpal5:<NEW_TOKEN>@github.com/junpal5/bid-tracker.git
+git remote set-url origin https://junpal5:<PAT>@github.com/junpal5/bid-tracker.git
 ```
+
+### PAT 발급 및 관리 안내 (사용자용)
+
+- **발급 위치**: GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+- **필요 권한**: `repo` 전체 선택
+- **만료 기간**: `No expiration` (무제한) 으로 설정하면 자주 갱신하지 않아도 됨
+- **보안 주의**: PAT는 채팅창에 입력 후 별도 보관하지 말 것. GitHub에서 언제든 삭제/재발급 가능
 
 ---
 
