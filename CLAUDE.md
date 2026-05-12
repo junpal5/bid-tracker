@@ -39,10 +39,14 @@
 ```bash
 git add <변경된 파일들>
 git commit -m "dashboard: <작업 요약>"
+# 현재 브랜치 확인 — main이 아니면 main으로 merge 후 push
+git branch  # 현재 브랜치 확인
+git checkout main && git merge <브랜치명>  # feature 브랜치인 경우에만
 git push origin main
 ```
 
-> Push 실패 시: 원격에 새 커밋이 있을 수 있으므로 `git pull origin main --rebase` 후 재시도한다.
+> Push 실패 시 (충돌): `git pull origin main --rebase` 후 재시도한다.  
+> Push 실패 시 (403 인증 오류): PAT가 초기화된 것이므로 `git remote set-url origin https://junpal5:<PAT>@github.com/junpal5/bid-tracker.git` 후 재시도한다.
 
 ---
 
@@ -56,7 +60,11 @@ git push origin main
 ### version-history.json
 - `currentVersion`: 현재 버전 문자열
 - `history`: 최신 버전이 배열 **맨 앞**에 위치
-- 날짜 형식: `"2026-05-07T00:00:00.000Z"` (ISO 8601)
+- 날짜 형식: ISO 8601 UTC — **반드시 실제 수정 시각**을 사용한다.
+  ```bash
+  date -u +"%Y-%m-%dT%H:%M:%S.000Z"  # 이 값을 그대로 date 필드에 입력
+  ```
+  > `T00:00:00.000Z`로 고정하면 한국시간 기준 오전 9:00으로 표시되므로 금지.
 
 ---
 
