@@ -1038,6 +1038,17 @@ tr:hover td{background:rgba(124,58,237,.03)}
 </div>
 </div>
 
+<!-- ══ MODAL: 경쟁사 대결 히스토리 ══ -->
+<div class="modal-overlay hidden" id="comp-history-modal">
+<div class="modal comp-score-sheet">
+  <div class="modal-header">
+    <h3 id="comp-history-modal-title">대결 히스토리</h3>
+    <button class="modal-close" onclick="closeModal('comp-history-modal')">✕</button>
+  </div>
+  <div class="comp-score-sheet-body" id="comp-history-modal-body"></div>
+</div>
+</div>
+
 <!-- ══ MODAL: 경쟁사 점수 비교 ══ -->
 <div class="modal-overlay hidden" id="comp-score-modal">
 <div class="modal comp-score-sheet">
@@ -1944,6 +1955,32 @@ function buildCompetitorScoreDetail(b){
   }).join('');
   return `<div class="comp-score-summary"><div><div style="font-size:14px;font-weight:700;">${b.사업명}</div><div class="score-compare-meta">${b.입찰일||''} · ${b.발주처||''} · ${fieldBadge(b.사업분야)} · 참여사 ${b.competitors.length+1}개</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;">${winnerBadge(b.낙찰사,b.결과)}${resultBadge(b.결과)}</div><div class="comp-score-stat"><div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;">우리 제안가</div><div style="font-size:20px;font-weight:800;color:var(--accent3);">${fmtMoney(b.우리제안가)}</div><div class="text-sm text-muted" style="margin-top:4px;">(${fmtPct(calcProposalRate(b.우리제안가,b.사업금액))})</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">${bars}</div><div class="comp-score-price-grid">${priceCards||'<div class="text-sm text-muted">추정 제안가 데이터 없음</div>'}</div></div>`;
 }
+function openCompHistoryModal(compName){
+  const yF=COMPF.year;
+  const bids=DB.bids.filter(b=>{if(b.계약유형!=='경쟁입찰')return false;if(yF!=='all'&&b.연도!=yF)return false;return b.competitors.some(c=>c.name===compName);});
+  const sorted=[...bids].sort((a,b)=>(b.입찰일||'').localeCompare(a.입찰일||''));
+  const total=sorted.length;
+  const ourWin=sorted.filter(b=>b.결과==='수주').length;
+  const compWin=sorted.filter(b=>b.낙찰사===compName).length;
+  const thirdWin=sorted.filter(b=>b.낙찰사&&b.낙찰사!=='우리팀'&&b.낙찰사!==compName).length;
+  const rows=sorted.map(b=>{
+    const comp=b.competitors.find(c=>c.name===compName);
+    const ourT=(b.우리기술!==null&&b.우리가격!==null)?(b.우리기술||0)+(b.우리가격||0):null;
+    const compT=(comp&&comp.기술!==null&&comp.가격!==null)?(comp.기술||0)+(comp.가격||0):null;
+    let scoreDiff='<span style="color:var(--text3);">—</span>';
+    if(ourT!==null&&compT!==null){const d=ourT-compT;scoreDiff=`<span style="color:${d>=0?'var(--ok)':'#ef4444'};font-weight:600;">${d>=0?'+':''}${d.toFixed(2)}</span>`;}
+    let wb='<span style="color:var(--text3);">—</span>';
+    if(b.낙찰사==='우리팀')wb='<span class="winner-chip">🏆 우리팀 수주</span>';
+    else if(b.낙찰사===compName)wb='<span class="winner-chip" style="background:rgba(239,68,68,.1);color:#ef4444;border-color:rgba(239,68,68,.3);">🔴 경쟁사 낙찰</span>';
+    else if(b.낙찰사)wb='<span class="winner-chip" style="background:rgba(245,158,11,.1);color:#f59e0b;border-color:rgba(245,158,11,.3);">⚠ 제3자 낙찰</span>';
+    return `<tr><td style="white-space:nowrap;">${b.연도||'—'}</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${b.사업명}">${b.사업명}</td><td style="text-align:center;">${scoreDiff}</td><td>${wb}</td></tr>`;
+  }).join('');
+  const statsHtml=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">${[['총 대결',total,'var(--text1)'],['우리 수주',ourWin,'var(--ok)'],['경쟁사 낙찰',compWin,'#ef4444'],['제3자 낙찰',thirdWin,'#f59e0b']].map(([label,val,color])=>`<div style="flex:1;min-width:72px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:${color};">${val}</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">${label}</div></div>`).join('')}</div>`;
+  const tableHtml=`<div class="table-wrap"><table><thead><tr><th style="width:48px;">연도</th><th>프로젝트명</th><th style="width:80px;text-align:center;">총 점수 차</th><th style="width:120px;">승패 여부</th></tr></thead><tbody>${rows||'<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text3);">데이터 없음</td></tr>'}</tbody></table></div>`;
+  document.getElementById('comp-history-modal-title').textContent=`🏢 ${compName}  대결 히스토리`;
+  document.getElementById('comp-history-modal-body').innerHTML=statsHtml+tableHtml;
+  openModal('comp-history-modal');
+}
 function openCompScoreModal(idx){
   const b=DB.bids[idx];
   if(!b)return;
@@ -2432,7 +2469,7 @@ function renderCompetitor(){
     if(c.기술!==null)m.techs.push(c.기술);
     if(c.가격!==null)m.prices.push(c.가격);
   }));
-  document.getElementById('comp-summary-tbody').innerHTML=Object.entries(compMap).sort((a,b)=>b[1].total-a[1].total).map(([name,d])=>`<tr><td><strong>${name}</strong></td><td>${d.total}</td><td><span class="badge badge-success">${d.ourWin}</span></td><td><span class="badge badge-danger">${d.compWin}</span></td><td>${d.total>0?(d.compWin/d.total*100).toFixed(1)+'%':'—'}</td></tr>`).join('')||`<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3);">경쟁사 데이터 없음</td></tr>`;
+  document.getElementById('comp-summary-tbody').innerHTML=Object.entries(compMap).sort((a,b)=>b[1].total-a[1].total).map(([name,d])=>`<tr style="cursor:pointer;" onclick="openCompHistoryModal('${name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')" title="${name} 대결 히스토리 보기"><td><strong>${name}</strong> <span style="font-size:11px;color:var(--text3);">↗</span></td><td>${d.total}</td><td><span class="badge badge-success">${d.ourWin}</span></td><td><span class="badge badge-danger">${d.compWin}</span></td><td>${d.total>0?(d.compWin/d.total*100).toFixed(1)+'%':'—'}</td></tr>`).join('')||`<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3);">경쟁사 데이터 없음</td></tr>`;
   const sorted=[...data].filter(b=>b.competitors.length>0).sort((a,b)=>(b.입찰일||'').localeCompare(a.입찰일||''));
   document.getElementById('comp-detail-list').innerHTML=sorted.length?sorted.map(b=>{
     const idx=DB.bids.indexOf(b);
