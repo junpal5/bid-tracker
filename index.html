@@ -35,7 +35,7 @@ body{font-family:'Inter','Pretendard','Apple SD Gothic Neo',sans-serif;backgroun
 .nav-item:hover{color:var(--text);background:rgba(124,58,237,.07)}
 .nav-item.active{color:var(--accent);background:rgba(124,58,237,.1);border-left-color:var(--accent)}
 .nav-icon{font-size:16px;width:20px;text-align:center}
-.main{margin-left:220px;flex:1;padding:28px 32px;min-height:100vh}
+.main{margin-left:220px;flex:1;min-width:0;padding:28px 32px;min-height:100vh}
 .page{display:none}.page.active{display:block}
 .page-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .page-header-left h2{font-size:22px;font-weight:700}
@@ -57,12 +57,13 @@ body{font-family:'Inter','Pretendard','Apple SD Gothic Neo',sans-serif;backgroun
 .stat-label{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 .stat-value{font-size:32px;font-weight:800;margin:8px 0 4px;line-height:1}
 .stat-sub{font-size:12px;color:var(--text3)}
+.stat-unit{font-size:.55em;font-weight:700;margin-left:3px;color:var(--text3)}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{background:var(--bg3);padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border)}
 td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.07);color:var(--text);vertical-align:middle}
 tr:hover td{background:rgba(255,255,255,.02)}
-.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge{display:inline-block;white-space:nowrap;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600}
 .badge-success{background:rgba(34,197,94,.15);color:var(--success)}
 .badge-danger{background:rgba(239,68,68,.15);color:var(--danger)}
 .badge-warn{background:rgba(245,158,11,.15);color:var(--warn)}
@@ -71,7 +72,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .badge-indigo{background:rgba(99,102,241,.15);color:var(--indigo)}
 .badge-pink{background:rgba(236,72,153,.15);color:var(--pink)}
 .badge-teal{background:rgba(6,182,212,.15);color:var(--accent3)}
-.winner-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+.winner-chip{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
 .controls{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 /* 탭 필터 */
 .filter-group{margin-bottom:16px}
@@ -83,6 +84,16 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .tab-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .filter-search{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 12px;border-radius:20px;font-size:12px;outline:none;font-family:inherit;width:180px}
 .filter-search:focus{border-color:var(--accent)}
+.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-select{display:inline-flex;align-items:center;gap:6px;padding:0 4px 0 12px;border:1px solid var(--border);border-radius:20px;background:var(--card);font-size:12px;font-weight:600;color:var(--text3);cursor:pointer}
+.filter-select.on{border-color:var(--accent);color:var(--accent)}
+.filter-select select{width:auto;border:none !important;box-shadow:none !important;background:transparent !important;padding:6px 6px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer}
+.filter-bar .filter-search{width:220px}
+.filter-check{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;padding:0 4px}
+.filter-check input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
+.comp-row{cursor:pointer}
+.comp-row-more{font-size:12px;font-weight:600;color:var(--accent);white-space:nowrap}
+.comp-row:hover strong{color:var(--accent)}
 .btn{padding:8px 16px;border-radius:var(--radius2);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
 .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#6d28d9}
 .btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
@@ -123,6 +134,11 @@ textarea{resize:vertical;min-height:60px}
 .modal-overlay.hidden{display:none}
 .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:28px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto}
 .modal-sm{max-width:440px}
+.confirm-overlay{z-index:1000}
+.confirm-box{max-width:400px}
+.confirm-msg{font-size:16px;font-weight:700;color:var(--text);line-height:1.5}
+.confirm-detail{font-size:13px;color:var(--text3);margin-top:8px;line-height:1.5;word-break:keep-all}
+.confirm-box .modal-footer{border-top:none;padding-top:0}
 .modal h3{font-size:16px;font-weight:700;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
 .modal-close{cursor:pointer;font-size:20px;background:none;border:none;color:var(--text2);flex-shrink:0}
 .modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
@@ -140,6 +156,16 @@ textarea{resize:vertical;min-height:60px}
 .no-data-note{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:var(--radius2);padding:10px 14px;font-size:12px;color:var(--indigo)}
 .auto-note{background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.2);border-radius:var(--radius2);padding:8px 12px;font-size:12px;color:var(--accent3)}
 .yearly-cost-list{display:grid;gap:6px;margin-top:10px}
+.kpi-hero .stat-value{color:var(--warn)}
+.kpi-progress{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:10px 0 8px}
+.kpi-progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--warn),#fbbf24);border-radius:3px;transition:width .8s}
+.card-title-count{float:right;font-weight:600;letter-spacing:0;text-transform:none;color:var(--text3)}
+.recent-mini-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.recent-mini-item:last-child{border-bottom:none}
+.recent-mini-main{min-width:0;flex:1}
+.recent-mini-title{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent-mini-meta{font-size:12px;color:var(--text3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent-mini-badges{display:flex;gap:4px;flex-shrink:0}
 .yearly-cost-item{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding-top:6px;border-top:1px solid rgba(255,255,255,.07)}
 .score-compare-list{display:grid;gap:12px}
 .score-compare-trigger{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;color:var(--text);text-align:left;cursor:pointer;transition:all .2s}
@@ -147,6 +173,8 @@ textarea{resize:vertical;min-height:60px}
 .score-compare-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;color:var(--text3);font-size:12px}
 .bid-name-col{width:var(--bid-name-col-width);min-width:var(--bid-name-col-width)}
 .bid-name-cell{max-width:var(--bid-name-col-width);min-width:var(--bid-name-col-width);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-bids .table-wrap th,#page-bids .table-wrap td{white-space:nowrap;word-break:keep-all}
+.bid-org-cell{max-width:170px;overflow:hidden;text-overflow:ellipsis}
 .comp-score-sheet{display:flex;flex-direction:column}
 .comp-score-sheet .modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:0;padding-bottom:14px;border-bottom:1px solid var(--border)}
 .comp-score-sheet .modal-header h3{margin-bottom:0;display:block;flex:1;line-height:1.4}
@@ -182,7 +210,8 @@ textarea{resize:vertical;min-height:60px}
 .comp-table tr.winner-hl td{background:rgba(245,158,11,.07)}
 @media(max-width:900px){
   .sidebar{width:60px}
-  .sidebar-logo,.nav-item span,.sidebar-footer{display:none}
+  .sidebar-logo,.nav-item span:not(.nav-icon),.sidebar-footer{display:none}
+  .nav-item{justify-content:center;padding:12px 0}
   .main{margin-left:60px;padding:20px 16px}
   .grid4,.grid5{grid-template-columns:1fr 1fr}
   .grid3{grid-template-columns:1fr 1fr}
@@ -196,8 +225,12 @@ textarea{resize:vertical;min-height:60px}
   .main{margin-left:0 !important;width:100%;padding:12px 14px;padding-bottom:90px;box-sizing:border-box}
 
   /* 그리드 */
-  .grid2,.grid3,.grid4{grid-template-columns:1fr}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .grid4{grid-template-columns:1fr 1fr;gap:10px}
   .grid5{display:grid;grid-template-columns:1fr 1fr}
+  .grid4 .stat-value{font-size:24px}
+  .grid4 .stat-label{font-size:11px}
+  .grid4 .stat-sub{font-size:11px}
 
   /* 페이지 헤더 */
   .page-header{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:14px}
@@ -231,6 +264,12 @@ textarea{resize:vertical;min-height:60px}
   .tab-filters::-webkit-scrollbar{display:none}
   .tab-btn{white-space:nowrap;flex-shrink:0;padding:7px 14px;font-size:13px}
   .filter-search{min-width:0;width:100%;font-size:14px;padding:9px 12px}
+  .filter-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .filter-select{justify-content:space-between}
+  .filter-select select{font-size:16px;padding:8px 6px}
+  .filter-bar .filter-search{grid-column:1/-1;width:100%}
+  .filter-bar .filter-reset{grid-column:1/-1;justify-content:center}
+  .filter-bar .comp-name-select,.filter-bar .filter-check{grid-column:1/-1}
 
   /* 테이블 */
   .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -334,20 +373,21 @@ textarea{resize:vertical;min-height:60px}
   .mobile-header{display:flex}
 }
 
-/* ── 다크/라이트 모드 토글 버튼 ── */
-.theme-fab{
-  position:fixed;bottom:80px;right:20px;
-  width:40px;height:40px;border-radius:50%;
-  border:1px solid var(--border2);background:var(--card2);
-  color:var(--text);font-size:18px;cursor:pointer;
-  z-index:500;display:flex;align-items:center;justify-content:center;
-  transition:all .2s;
-  box-shadow:0 4px 16px rgba(0,0,0,.2);
-  font-family:inherit;line-height:1;
-}
-.theme-fab:hover{transform:scale(1.1);border-color:var(--accent);box-shadow:0 6px 20px rgba(0,0,0,.3)}
-@media(max-width:600px){
-  .theme-fab{bottom:calc(68px + env(safe-area-inset-bottom,0px) + 14px);right:14px;width:38px;height:38px;font-size:16px}
+/* ── 메뉴 안 도구(저장 상태 · 다크모드) ── */
+.sidebar-tools{margin-top:auto;padding:14px 20px;border-top:1px solid var(--border);display:grid;gap:8px}
+.sidebar-footer{margin-top:0}
+.theme-toggle{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text2);font:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.theme-toggle .theme-icon{font-size:14px;line-height:1}
+.sidebar-tools .app-sync-indicator,.mobile-header-tools .app-sync-indicator{background:transparent !important;border:none !important;box-shadow:none !important;backdrop-filter:none;padding:2px 4px;font-size:12px}
+.mobile-header-tools{display:flex;align-items:center;gap:6px}
+.mobile-header-tools .theme-toggle{width:36px;height:36px;padding:0;justify-content:center}
+.mobile-header-tools .theme-toggle .theme-label{display:none}
+@media(max-width:900px){
+  .sidebar-tools{padding:10px 8px}
+  .sidebar-tools .theme-toggle{justify-content:center;padding:8px 0}
+  .sidebar-tools .theme-label,.sidebar-tools .app-sync-indicator-text{display:none}
+  .sidebar-tools .app-sync-indicator{justify-content:center}
 }
 
 </style>
@@ -421,6 +461,10 @@ tr:hover td{background:rgba(124,58,237,.03)}
   <div class="nav-item" data-page="contacts"><span class="nav-icon">📞</span><span>컨택 건수</span></div>
   <div class="nav-item" data-page="costs" onclick="tryOpenCosts(event)"><span class="nav-icon">📊</span><span>프로젝트별 비용률</span></div>
   <div class="nav-item" data-page="data" onclick="tryOpenData(event)"><span class="nav-icon">⚙️</span><span>데이터 관리</span></div>
+  <div class="sidebar-tools">
+    <div class="app-sync-indicator sync-idle" title="저장 상태"><span class="sync-dot"></span><span class="app-sync-indicator-text">동기화 완료</span></div>
+    <button type="button" class="theme-toggle" onclick="toggleTheme()" title="다크/라이트 모드 전환"><span class="theme-icon">🌙</span><span class="theme-label">다크 모드</span></button>
+  </div>
   <div class="sidebar-footer">
     <div>
       <div class="sidebar-footer-label">최종 수정일</div>
@@ -442,6 +486,10 @@ tr:hover td{background:rgba(124,58,237,.03)}
     <div class="mobile-header-title" id="mobile-page-title">📊 전체 현황</div>
     <div class="mobile-header-sub">사회조사 2부문 2실 3팀</div>
   </div>
+  <div class="mobile-header-tools">
+    <div class="app-sync-indicator sync-idle" title="저장 상태"><span class="sync-dot"></span><span class="app-sync-indicator-text">동기화 완료</span></div>
+    <button type="button" class="theme-toggle" onclick="toggleTheme()" title="다크/라이트 모드 전환"><span class="theme-icon">🌙</span><span class="theme-label">다크 모드</span></button>
+  </div>
 </div>
 
 <!-- 모바일 하단 탭바 -->
@@ -458,7 +506,6 @@ tr:hover td{background:rgba(124,58,237,.03)}
 </div>
 
 <main class="main">
-<div id="app-sync-indicator-root" class="app-sync-indicator-root"><div id="app-sync-indicator" class="app-sync-indicator sync-idle"><span class="sync-dot"></span><span id="app-sync-indicator-text">동기화 완료</span></div></div>
 
 <!-- ══ HOME ══ -->
 <div class="page active" id="page-home">
@@ -471,13 +518,11 @@ tr:hover td{background:rgba(124,58,237,.03)}
       <button class="tab-btn active" onclick="setHomeYear('all',this)">전체</button>
     </div>
   </div>
-  <div class="grid3 mb16">
-    <div class="stat-card blue"><div class="stat-label">총 프로젝트</div><div class="stat-value" id="h-total">0</div><div class="stat-sub">경쟁 <strong id="h-comp">0</strong> · 수의 <strong id="h-sole">0</strong></div></div>
-    <div class="stat-card green"><div class="stat-label">수주 건수</div><div class="stat-value" id="h-win">0</div><div class="stat-sub">수주율(경쟁) <strong id="h-rate">—</strong></div></div>
-    <div class="stat-card red"><div class="stat-label">탈락 건수</div><div class="stat-value" id="h-lose">0</div><div class="stat-sub">경쟁입찰 기준</div></div>
-    <div class="stat-card pink"><div class="stat-label">컨택 건수</div><div class="stat-value" id="h-contact">0</div><div class="stat-sub">잠재 고객사</div></div>
-    <div class="stat-card warn"><div class="stat-label">올해 달성률</div><div class="stat-value" id="h-achieve">—</div><div class="stat-sub" id="h-achieve-sub">연간 목표 대비</div></div>
-    <div class="stat-card indigo"><div class="stat-label">연도별 평균 비용률</div><div class="stat-value" id="h-cost-rate">—</div><div class="stat-sub" id="h-cost-rate-sub">비용률 데이터 없음</div><div class="yearly-cost-list" id="h-cost-year-list"></div></div>
+  <div class="grid4 home-kpi mb16">
+    <div class="stat-card warn kpi-hero"><div class="stat-label" id="h-achieve-label">올해 목표 달성률</div><div class="stat-value" id="h-achieve">—</div><div class="kpi-progress"><div class="kpi-progress-fill" id="h-achieve-bar"></div></div><div class="stat-sub" id="h-achieve-sub">연간 목표 대비</div></div>
+    <div class="stat-card green"><div class="stat-label">수주율 (경쟁입찰)</div><div class="stat-value" id="h-rate">—</div><div class="stat-sub">수주 <strong id="h-comp-win2">0</strong> · 탈락 <strong id="h-lose">0</strong></div></div>
+    <div class="stat-card blue"><div class="stat-label">수주 건수</div><div class="stat-value" id="h-win">0</div><div class="stat-sub">전체 <strong id="h-total">0</strong>건 (경쟁 <strong id="h-comp">0</strong> · 수의 <strong id="h-sole">0</strong>)</div></div>
+    <div class="stat-card indigo"><div class="stat-label">평균 비용률</div><div class="stat-value" id="h-cost-rate">—</div><div class="stat-sub" id="h-cost-rate-sub">비용률 데이터 없음</div><div class="yearly-cost-list" id="h-cost-year-list"></div></div>
   </div>
   <div class="grid2 mb16">
     <div class="card">
@@ -489,7 +534,7 @@ tr:hover td{background:rgba(124,58,237,.03)}
       </div>
       <div style="margin-top:12px;"><div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;"><div id="h-type-bar" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--indigo));border-radius:4px;transition:width .8s;width:0%;"></div></div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px;"><span>← 경쟁</span><span>수의 →</span></div></div>
     </div>
-    <div class="card"><div class="card-title">최근 컨택 현황</div><div id="home-contact-list"></div></div>
+    <div class="card"><div class="card-title">최근 컨택 현황 <span class="card-title-count">전체 <span id="h-contact">0</span>건</span></div><div id="home-contact-list"></div></div>
   </div>
   <div class="grid3 mb16">
     <div class="summary-card" onclick="goPage('bids')"><div class="arrow">→</div><div class="card-title">수주/탈락 내역</div><div style="height:110px;"><canvas id="home-bid-chart"></canvas></div><div class="text-sm text-muted mt16">연도별 입찰 현황 → 상세보기</div></div>
@@ -498,7 +543,8 @@ tr:hover td{background:rgba(124,58,237,.03)}
   </div>
   <div class="card">
     <div class="card-title">최근 입찰 5건</div>
-    <div class="table-wrap"><table><thead><tr><th>입찰일</th><th>사업명</th><th>발주처</th><th>분야</th><th>유형</th><th>경쟁사 수</th><th>낙찰사</th><th>결과</th></tr></thead><tbody id="home-recent-tbody"></tbody></table></div>
+    <div class="table-wrap pc-only"><table><thead><tr><th>입찰일</th><th>사업명</th><th>발주처</th><th>분야</th><th>유형</th><th>경쟁사 수</th><th>낙찰사</th><th>결과</th></tr></thead><tbody id="home-recent-tbody"></tbody></table></div>
+    <div class="mobile-only" id="home-recent-cards"></div>
   </div>
 </div>
 
@@ -508,46 +554,19 @@ tr:hover td{background:rgba(124,58,237,.03)}
     <div class="page-header-left"><h2>📋 수주/탈락 내역</h2><p>연도별 입찰 결과 및 성공률 분석</p></div>
     <button class="btn btn-primary" onclick="openBidForm()">＋ 입찰 추가</button>
   </div>
-  <div class="filter-group">
-    <div class="filter-row">
-      <span class="filter-label">연도</span>
-      <div class="tab-filters" id="bid-year-tabs"></div>
-    </div>
-    <div class="filter-row">
-      <span class="filter-label">분야</span>
-      <div class="tab-filters" id="bid-field-tabs"></div>
-    </div>
-    <div class="filter-row">
-      <span class="filter-label">유형</span>
-      <div class="tab-filters" id="bid-type-tabs">
-        <button class="tab-btn active" onclick="setBidFilter('type','all',this)">전체</button>
-        <button class="tab-btn" onclick="setBidFilter('type','경쟁입찰',this)">경쟁 입찰</button>
-        <button class="tab-btn" onclick="setBidFilter('type','수의계약',this)">수의 계약</button>
-      </div>
-    </div>
-    <div class="filter-row">
-      <span class="filter-label">결과</span>
-      <div class="tab-filters" id="bid-result-tabs">
-        <button class="tab-btn active" onclick="setBidFilter('result','all',this)">전체</button>
-        <button class="tab-btn" onclick="setBidFilter('result','수주',this)">수주</button>
-        <button class="tab-btn" onclick="setBidFilter('result','탈락',this)">탈락</button>
-        <button class="tab-btn" onclick="setBidFilter('result','입찰중',this)">입찰중</button>
-      </div>
-    </div>
-    <div class="filter-row">
-      <span class="filter-label">검색</span>
-      <input class="filter-search" id="bid-search" placeholder="사업명 / 발주처 검색...">
-    </div>
+  <div class="filter-bar mb16">
+    <label class="filter-select"><span>연도</span><select id="bid-year-sel" onchange="setBidSelect('year',this.value)"></select></label>
+    <label class="filter-select"><span>분야</span><select id="bid-field-sel" onchange="setBidSelect('field',this.value)"></select></label>
+    <label class="filter-select"><span>유형</span><select id="bid-type-sel" onchange="setBidSelect('type',this.value)"><option value="all">전체</option><option value="경쟁입찰">경쟁 입찰</option><option value="수의계약">수의 계약</option></select></label>
+    <label class="filter-select"><span>결과</span><select id="bid-result-sel" onchange="setBidSelect('result',this.value)"><option value="all">전체</option><option value="수주">수주</option><option value="탈락">탈락</option><option value="입찰중">입찰중</option></select></label>
+    <input class="filter-search" id="bid-search" placeholder="🔍 사업명 / 발주처 검색">
+    <button type="button" class="btn btn-outline btn-sm filter-reset" id="bid-filter-reset" onclick="resetBidFilters()" style="display:none;">필터 초기화</button>
   </div>
-  <div class="grid4 mb16">
-    <div class="stat-card blue"><div class="stat-label">전체 건수</div><div class="stat-value" id="b-total">0</div></div>
-    <div class="stat-card green"><div class="stat-label">수주</div><div class="stat-value" id="b-win">0</div></div>
-    <div class="stat-card red"><div class="stat-label">탈락</div><div class="stat-value" id="b-lose">0</div></div>
-    <div class="stat-card warn"><div class="stat-label">수주율(경쟁)</div><div class="stat-value" id="b-rate">—</div></div>
-  </div>
-  <div class="grid2 mb16">
-    <div class="card"><div class="card-title">경쟁 입찰 현황</div><div style="display:flex;gap:20px;align-items:center;"><div><div class="stat-label">건수</div><div style="font-size:24px;font-weight:800;color:var(--accent);" id="b-comp-cnt">0</div></div><div><div class="stat-label">수주</div><div style="font-size:24px;font-weight:800;color:var(--success);" id="b-comp-win">0</div></div><div><div class="stat-label">탈락</div><div style="font-size:24px;font-weight:800;color:var(--danger);" id="b-comp-lose">0</div></div><div><div class="stat-label">수주율</div><div style="font-size:20px;font-weight:800;color:var(--warn);" id="b-comp-rate">—</div></div></div></div>
-    <div class="card"><div class="card-title">수의 계약 현황</div><div style="display:flex;gap:20px;align-items:center;"><div><div class="stat-label">건수</div><div style="font-size:24px;font-weight:800;color:var(--indigo);" id="b-sole-cnt">0</div></div><div><div class="stat-label">수주</div><div style="font-size:24px;font-weight:800;color:var(--success);" id="b-sole-win">0</div></div><div><div class="stat-label">계약금액 합계</div><div style="font-size:18px;font-weight:800;color:var(--accent3);" id="b-sole-amt">—</div></div></div></div>
+  <div class="grid4 home-kpi mb16">
+    <div class="stat-card blue"><div class="stat-label">전체 건수</div><div class="stat-value" id="b-total">0</div><div class="stat-sub">경쟁 <strong id="b-comp-cnt">0</strong> · 수의 <strong id="b-sole-cnt">0</strong></div></div>
+    <div class="stat-card green"><div class="stat-label">수주</div><div class="stat-value" id="b-win">0</div><div class="stat-sub">경쟁 <strong id="b-comp-win">0</strong> · 수의 <strong id="b-sole-win">0</strong></div></div>
+    <div class="stat-card warn"><div class="stat-label">수주율 (경쟁입찰)</div><div class="stat-value" id="b-rate">—</div><div class="stat-sub">탈락 <strong id="b-lose">0</strong>건</div></div>
+    <div class="stat-card indigo"><div class="stat-label">수의계약 계약금액</div><div class="stat-value" id="b-sole-amt">—</div><div class="stat-sub">수의계약 수주 건 합계</div></div>
   </div>
   <div class="grid2 mb16">
     <div class="card"><div class="card-title">연도별 건수</div><div class="chart-container"><canvas id="bid-year-chart"></canvas></div></div>
@@ -563,7 +582,7 @@ tr:hover td{background:rgba(124,58,237,.03)}
       </label>
     </div>
     <!-- PC: 테이블 -->
-    <div class="table-wrap pc-only"><table><thead><tr><th>연도</th><th>입찰일</th><th class="bid-name-col">사업명</th><th>발주처</th><th>분야</th><th>유형</th><th>사업금액</th><th>계약금액</th><th>기술평가</th><th>가격점수</th><th>경쟁사</th><th>낙찰사</th><th>결과</th><th>비용률</th><th>관리</th></tr></thead><tbody id="bids-tbody"></tbody></table></div>
+    <div class="table-wrap pc-only"><table><thead><tr><th>입찰일</th><th class="bid-name-col">사업명</th><th>발주처</th><th>분야</th><th>유형</th><th>사업금액</th><th>계약금액</th><th>기술평가</th><th>가격점수</th><th>경쟁사</th><th>낙찰사</th><th>결과</th><th>비용률</th><th>관리</th></tr></thead><tbody id="bids-tbody"></tbody></table></div>
     <!-- 모바일: 카드형 -->
     <div class="mobile-only" id="bids-cards"></div>
     <div class="load-more-wrap"><button class="btn btn-outline" id="bids-load-more" onclick="loadMoreBids()" style="display:none;">더보기</button></div>
@@ -573,18 +592,14 @@ tr:hover td{background:rgba(124,58,237,.03)}
 <!-- ══ COMPETITOR ══ -->
 <div class="page" id="page-competitor">
   <div class="page-header"><div class="page-header-left"><h2>🏢 경쟁사 분석</h2><p>점수 비교, 가격 역산, 경쟁사별 누적 집계 (경쟁 입찰 건만 표시)</p></div></div>
-  <div class="filter-group">
-    <div class="filter-row">
-      <span class="filter-label">연도</span>
-      <div class="tab-filters" id="comp-year-tabs"></div>
-    </div>
-    <div class="filter-row">
-      <span class="filter-label">경쟁사</span>
-      <div class="tab-filters" id="comp-name-tabs"></div>
-    </div>
+  <div class="filter-bar mb16">
+    <label class="filter-select"><span>연도</span><select id="comp-year-sel" onchange="setCompSelect('year',this.value)"></select></label>
+    <label class="filter-select comp-name-select"><span>경쟁사</span><select id="comp-name-sel" onchange="setCompSelect('name',this.value)"></select></label>
+    <label class="filter-check"><input type="checkbox" id="comp-min2" checked onchange="renderCompetitor()"> 2회 이상 대결한 곳만 보기</label>
   </div>
   <div class="section-title">경쟁사별 누적 집계</div>
-  <div class="card mb16"><div class="table-wrap"><table><thead><tr><th>경쟁사명</th><th>대결 횟수</th><th>우리 수주</th><th>경쟁사 낙찰</th><th>낙찰률</th></tr></thead><tbody id="comp-summary-tbody"></tbody></table></div></div>
+  <div class="auto-note mb8">경쟁사 이름(행)을 누르면 그 회사와의 대결 히스토리를 볼 수 있습니다.</div>
+  <div class="card mb16"><div class="table-wrap"><table><thead><tr><th>경쟁사명</th><th>대결 횟수</th><th>우리 수주</th><th>경쟁사 낙찰</th><th>낙찰률</th><th></th></tr></thead><tbody id="comp-summary-tbody"></tbody></table></div><div class="text-sm text-muted mt16" id="comp-hidden-note" style="display:none;"></div></div>
   <div class="section-title">입찰건별 점수 비교</div>
   <div class="auto-note mb16">프로젝트명과 수주/탈락 상태를 눌러 점수 비교 팝업을 열 수 있습니다.</div>
   <div class="score-compare-list" id="comp-detail-list"></div>
@@ -600,10 +615,10 @@ tr:hover td{background:rgba(124,58,237,.03)}
 
   <!-- 연간 목표 대비 요약 -->
   <div class="grid4 mb16">
-    <div class="stat-card blue"><div class="stat-label">연간 목표</div><div class="stat-value" style="font-size:22px;" id="rev-annual-goal">—</div><div class="stat-sub">만원</div></div>
-    <div class="stat-card green"><div class="stat-label">연간 수주 실적</div><div class="stat-value" style="font-size:22px;" id="rev-annual-actual">—</div><div class="stat-sub">만원</div></div>
+    <div class="stat-card blue"><div class="stat-label">연간 목표</div><div class="stat-value" id="rev-annual-goal">—</div><div class="stat-sub">연간 목표 금액</div></div>
+    <div class="stat-card green"><div class="stat-label">연간 수주 실적</div><div class="stat-value" id="rev-annual-actual">—</div><div class="stat-sub">VAT 제외 계약금액 합계</div></div>
     <div class="stat-card warn"><div class="stat-label">달성률</div><div class="stat-value" id="rev-annual-rate">—</div><div class="stat-sub">목표 대비</div></div>
-    <div class="stat-card red"><div class="stat-label">잔여 목표</div><div class="stat-value" style="font-size:22px;" id="rev-remain">—</div><div class="stat-sub">만원</div></div>
+    <div class="stat-card red" id="rev-remain-card"><div class="stat-label" id="rev-remain-label">잔여 목표</div><div class="stat-value" id="rev-remain">—</div><div class="stat-sub" id="rev-remain-sub">목표까지 남은 금액</div></div>
   </div>
 
   <div class="auto-note mb16">
@@ -652,7 +667,7 @@ tr:hover td{background:rgba(124,58,237,.03)}
     <div class="stat-card pink"><div class="stat-label">전체 컨택</div><div class="stat-value" id="ct-total">0</div></div>
     <div class="stat-card blue"><div class="stat-label">검토중/예정</div><div class="stat-value" id="ct-active">0</div></div>
     <div class="stat-card green"><div class="stat-label">수주 연결</div><div class="stat-value" id="ct-win">0</div></div>
-    <div class="stat-card warn"><div class="stat-label">예상 예산 합계</div><div class="stat-value" style="font-size:20px;" id="ct-budget">—</div><div class="stat-sub">만원</div></div>
+    <div class="stat-card warn"><div class="stat-label">예상 예산 합계</div><div class="stat-value" id="ct-budget">—</div><div class="stat-sub">컨택 건 예상 예산</div></div>
   </div>
   <div class="grid2 mb16">
     <div class="card"><div class="card-title">상태별 현황</div><div class="chart-container"><canvas id="ct-status-chart"></canvas></div></div>
@@ -676,7 +691,7 @@ tr:hover td{background:rgba(124,58,237,.03)}
   <div class="grid3 mb16">
     <div class="stat-card blue"><div class="stat-label">비용 등록 프로젝트</div><div class="stat-value" id="cost-count">0</div><div class="stat-sub">건</div></div>
     <div class="stat-card warn"><div class="stat-label">평균 비용률</div><div class="stat-value" id="cost-avg-rate">—</div><div class="stat-sub">전체 평균</div></div>
-    <div class="stat-card green"><div class="stat-label">총 수주금액</div><div class="stat-value" style="font-size:20px;" id="cost-total-contract">—</div><div class="stat-sub">만원</div></div>
+    <div class="stat-card green"><div class="stat-label">총 수주금액</div><div class="stat-value" id="cost-total-contract">—</div><div class="stat-sub">비용 등록 프로젝트 합계</div></div>
   </div>
 
   <div class="filter-row mb16">
@@ -1114,21 +1129,34 @@ tr:hover td{background:rgba(124,58,237,.03)}
 </div>
 </div>
 
+<div class="modal-overlay hidden confirm-overlay" id="confirm-modal">
+  <div class="modal modal-sm confirm-box" role="dialog" aria-modal="true">
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-detail" id="confirm-detail"></div>
+    <div class="modal-footer"><button type="button" class="btn btn-outline" id="confirm-cancel">취소</button><button type="button" class="btn btn-danger" id="confirm-ok">확인</button></div>
+  </div>
+</div>
 <script>
 // ── 테마 토글 ──
 const THEME_KEY='dashboard_theme';
+function updateThemeButtons(isDark){
+  document.querySelectorAll('.theme-toggle').forEach(function(btn){
+    var icon=btn.querySelector('.theme-icon'),label=btn.querySelector('.theme-label');
+    if(icon)icon.textContent=isDark?'☀️':'🌙';
+    if(label)label.textContent=isDark?'라이트 모드':'다크 모드';
+  });
+}
 function initTheme(){
   var saved=localStorage.getItem(THEME_KEY)||'light';
   var sheet=document.getElementById('glassmorphism-override');
-  var btn=document.getElementById('theme-fab');
-  if(saved==='dark'){sheet.disabled=true;if(btn)btn.textContent='☀️';}
-  else{sheet.disabled=false;if(btn)btn.textContent='🌙';}
+  sheet.disabled=(saved==='dark');
+  updateThemeButtons(saved==='dark');
 }
 function toggleTheme(){
   var sheet=document.getElementById('glassmorphism-override');
-  var btn=document.getElementById('theme-fab');
-  if(sheet.disabled){sheet.disabled=false;localStorage.setItem(THEME_KEY,'light');if(btn)btn.textContent='🌙';}
-  else{sheet.disabled=true;localStorage.setItem(THEME_KEY,'dark');if(btn)btn.textContent='☀️';}
+  sheet.disabled=!sheet.disabled;
+  localStorage.setItem(THEME_KEY,sheet.disabled?'dark':'light');
+  updateThemeButtons(sheet.disabled);
 }
 // ════════════════════════════════
 //  DATA STORE
@@ -1215,6 +1243,34 @@ function setBidFilter(key,val,el){
   el.classList.add('active');
   renderBids();
 }
+function setBidSelect(key,val){
+  BF[key]=val;
+  resetBidListVisible();
+  updateBidFilterReset();
+  renderBids();
+}
+function updateBidFilterReset(){
+  const btn=document.getElementById('bid-filter-reset');
+  const search=document.getElementById('bid-search');
+  const active=Object.values(BF).some(v=>v!=='all')||(search&&search.value.trim());
+  if(btn)btn.style.display=active?'inline-flex':'none';
+  ['year','field','type','result'].forEach(k=>{const el=document.getElementById(`bid-${k}-sel`);if(el)el.closest('.filter-select').classList.toggle('on',BF[k]!=='all');});
+}
+function resetBidFilters(){
+  Object.keys(BF).forEach(k=>BF[k]='all');
+  ['year','field','type','result'].forEach(k=>{const el=document.getElementById(`bid-${k}-sel`);if(el)el.value='all';});
+  const search=document.getElementById('bid-search');if(search)search.value='';
+  resetBidListVisible();
+  updateBidFilterReset();
+  renderBids();
+}
+function setCompSelect(key,val){
+  COMPF[key]=val;
+  const el=document.getElementById(`comp-${key}-sel`);
+  if(el)el.closest('.filter-select').classList.toggle('on',val!=='all');
+  renderCompetitor();
+}
+function escapeAttr(v){return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 function setCompFilter(key,val,el){
   COMPF[key]=val;
   el.closest('.tab-filters').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -1513,42 +1569,11 @@ let ghChangeSeq=0;
 let ghSyncedSeq=0;
 let ghIndicatorTimer=null;
 
-function mountAppSyncIndicator(){
-  const indicator=document.getElementById('app-sync-indicator');
-  const root=document.getElementById('app-sync-indicator-root');
-  const activePage=document.querySelector('.page.active');
-  if(!indicator||!root)return;
-
-  const fallback=()=>{
-    if(indicator.parentElement!==root)root.appendChild(indicator);
-  };
-
-  if(!activePage){fallback();return;}
-  const header=activePage.querySelector('.page-header');
-  if(!header){fallback();return;}
-
-  let actions=header.querySelector('.page-header-actions');
-  if(!actions){
-    const moveTargets=[...header.children].filter(el=>!el.classList.contains('page-header-left')&&el!==indicator);
-    if(moveTargets.length||header.querySelector('.btn,[onclick],.header-actions,.header-tools')){
-      actions=document.createElement('div');
-      actions.className='page-header-actions';
-      moveTargets.forEach(el=>actions.appendChild(el));
-      header.appendChild(actions);
-    }
-  }
-
-  if(actions){
-    if(indicator.parentElement!==actions)actions.appendChild(indicator);
-  }else{
-    fallback();
-  }
-}
+function mountAppSyncIndicator(){}
 
 function setAppSyncIndicator(state){
-  const wrap=document.getElementById('app-sync-indicator');
-  const textEl=document.getElementById('app-sync-indicator-text');
-  if(!wrap||!textEl)return;
+  const wraps=document.querySelectorAll('.app-sync-indicator');
+  if(!wraps.length)return;
   const states={
     saving:{text:'저장 중',cls:'sync-saving'},
     saved:{text:'저장 완료',cls:'sync-saved'},
@@ -1556,9 +1581,11 @@ function setAppSyncIndicator(state){
     idle:{text:'동기화 완료',cls:'sync-idle'}
   };
   const current=states[state]||states.idle;
-  wrap.className=`app-sync-indicator ${current.cls}`;
-  textEl.textContent=current.text;
-  mountAppSyncIndicator();
+  wraps.forEach(wrap=>{
+    wrap.className=`app-sync-indicator ${current.cls}`;
+    const textEl=wrap.querySelector('.app-sync-indicator-text');
+    if(textEl)textEl.textContent=current.text;
+  });
 }
 
 function scheduleAppSyncIdle(){
@@ -1678,8 +1705,8 @@ function saveGhToken(){
   showToast('토큰이 저장되었습니다. 이제 데이터 변경 시 GitHub에 자동 저장됩니다.','success');
   updateDataSummary();
 }
-function clearGhToken(){
-  if(!confirm('GitHub 토큰을 삭제할까요? 이후 저장은 로컬에만 됩니다.'))return;
+async function clearGhToken(){
+  if(!(await askConfirm('GitHub 토큰을 삭제할까요?',{detail:'삭제하면 이후 저장은 이 브라우저에만 됩니다.',okText:'삭제',danger:true})))return;
   localStorage.removeItem('gh_token');
   document.getElementById('gh-token-display').textContent='미설정';
   updateGhStatus('none');
@@ -1825,30 +1852,36 @@ function refreshFilters(){
     years.forEach(y=>homeTabs.innerHTML+=`<button class="tab-btn${HF.year==y?' active':''}" onclick="setHomeYear('${y}',this)">${y}년</button>`);
   }
 
-  // 수주/탈락 - 연도 탭
-  const byTabs=document.getElementById('bid-year-tabs');
-  if(byTabs){
-    byTabs.innerHTML=`<button class="tab-btn${BF.year==='all'?' active':''}" onclick="setBidFilter('year','all',this)">전체</button>`;
-    years.forEach(y=>byTabs.innerHTML+=`<button class="tab-btn${BF.year==y?' active':''}" onclick="setBidFilter('year','${y}',this)">${y}년</button>`);
+  // 수주/탈락 - 연도·분야 선택 목록
+  const bySel=document.getElementById('bid-year-sel');
+  if(bySel){
+    if(BF.year!=='all'&&!years.map(String).includes(String(BF.year)))BF.year='all';
+    bySel.innerHTML='<option value="all">전체</option>'+years.map(y=>`<option value="${y}">${y}년</option>`).join('');
+    bySel.value=BF.year;
   }
-  // 수주/탈락 - 분야 탭
-  const bfTabs=document.getElementById('bid-field-tabs');
-  if(bfTabs){
-    bfTabs.innerHTML=`<button class="tab-btn${BF.field==='all'?' active':''}" onclick="setBidFilter('field','all',this)">전체</button>`;
-    fields.forEach(f=>bfTabs.innerHTML+=`<button class="tab-btn${BF.field===f?' active':''}" onclick="setBidFilter('field','${f}',this)">${f}</button>`);
+  const bfSel=document.getElementById('bid-field-sel');
+  if(bfSel){
+    if(BF.field!=='all'&&!fields.includes(BF.field))BF.field='all';
+    bfSel.innerHTML='<option value="all">전체</option>'+fields.map(f=>`<option value="${f}">${f}</option>`).join('');
+    bfSel.value=BF.field;
   }
+  updateBidFilterReset();
 
-  // 경쟁사 - 연도 탭
-  const cyTabs=document.getElementById('comp-year-tabs');
-  if(cyTabs){
-    cyTabs.innerHTML=`<button class="tab-btn${COMPF.year==='all'?' active':''}" onclick="setCompFilter('year','all',this)">전체</button>`;
-    years.forEach(y=>cyTabs.innerHTML+=`<button class="tab-btn${COMPF.year==y?' active':''}" onclick="setCompFilter('year','${y}',this)">${y}년</button>`);
+  // 경쟁사 - 연도·경쟁사 선택 목록 (경쟁사는 대결 횟수 많은 순)
+  const cySel=document.getElementById('comp-year-sel');
+  if(cySel){
+    if(COMPF.year!=='all'&&!years.map(String).includes(String(COMPF.year)))COMPF.year='all';
+    cySel.innerHTML='<option value="all">전체</option>'+years.map(y=>`<option value="${y}">${y}년</option>`).join('');
+    cySel.value=COMPF.year;
   }
-  // 경쟁사 - 경쟁사명 탭
-  const cnTabs=document.getElementById('comp-name-tabs');
-  if(cnTabs){
-    cnTabs.innerHTML=`<button class="tab-btn${COMPF.name==='all'?' active':''}" onclick="setCompFilter('name','all',this)">전체</button>`;
-    comps.forEach(c=>cnTabs.innerHTML+=`<button class="tab-btn${COMPF.name===c?' active':''}" onclick="setCompFilter('name','${c}',this)">${c}</button>`);
+  const cnSel=document.getElementById('comp-name-sel');
+  if(cnSel){
+    const cnt={};
+    DB.bids.forEach(b=>{if(b.계약유형==='경쟁입찰')(b.competitors||[]).forEach(c=>{if(c.name)cnt[c.name]=(cnt[c.name]||0)+1;});});
+    const ordered=[...comps].sort((a,b)=>(cnt[b]||0)-(cnt[a]||0)||a.localeCompare(b,'ko'));
+    if(COMPF.name!=='all'&&!ordered.includes(COMPF.name))COMPF.name='all';
+    cnSel.innerHTML='<option value="all">전체</option>'+ordered.map(c=>`<option value="${escapeAttr(c)}">${c} (${cnt[c]||0}회)</option>`).join('');
+    cnSel.value=COMPF.name;
   }
 
   // 컨택 - 연도 탭
@@ -1884,7 +1917,8 @@ function filteredBids(yF,fF,tF,rF,search){
 // ════════════════════════════════
 //  FORMAT
 // ════════════════════════════════
-function fmtMoney(v){return(v===null||v===undefined||v==='')?'—':Number(v).toLocaleString()+'만원';}
+function fmtMoney(v){return(v===null||v===undefined||v==='')?'—':Math.round(Number(v)).toLocaleString()+'만원';}
+function fmtManHTML(v){return `${Math.round(Number(v)||0).toLocaleString()}<span class="stat-unit">만원</span>`;}
 function fmtScore(v){return(v===null||v===undefined||v==='')?'—':Number(v).toFixed(2);}
 function fmtPct(v){return(v===null||isNaN(v))?'—':v.toFixed(1)+'%';}
 function resultBadge(r){if(r==='수주')return`<span class="badge badge-success">수주</span>`;if(r==='탈락')return`<span class="badge badge-danger">탈락</span>`;return`<span class="badge badge-warn">${r||'입찰중'}</span>`;}
@@ -1916,11 +1950,29 @@ function calcAggregateCostRate(costs){
 const C={blue:'#7C3AED',purple:'#6366F1',green:'#22c55e',red:'#ef4444',warn:'#f59e0b',teal:'#06B6D4',indigo:'#8B5CF6',pink:'#ec4899'};
 const CD={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9EA3C0',font:{family:'Inter,Pretendard,sans-serif'}}}},scales:{x:{ticks:{color:'#9EA3C0'},grid:{color:'rgba(255,255,255,.07)'}},y:{ticks:{color:'#9EA3C0'},grid:{color:'rgba(255,255,255,.07)'}}}};
 function dk(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
-function mkChart(id,type,data,opts){dk(id);const el=document.getElementById(id);if(!el)return;charts[id]=new Chart(el.getContext('2d'),{type,data,options:{...CD,...opts}});}
+function mkChart(id,type,data,opts){dk(id);const el=document.getElementById(id);if(!el)return;const base=(type==='doughnut'||type==='pie')?{...CD,scales:{}}:CD;charts[id]=new Chart(el.getContext('2d'),{type,data,options:{...base,...opts}});}
 
 // ════════════════════════════════
 //  MODAL HELPERS
 // ════════════════════════════════
+function askConfirm(message,opts={}){
+  return new Promise(resolve=>{
+    const ov=document.getElementById('confirm-modal');
+    document.getElementById('confirm-msg').textContent=message;
+    const d=document.getElementById('confirm-detail');
+    d.textContent=opts.detail||'';d.style.display=opts.detail?'block':'none';
+    const ok=document.getElementById('confirm-ok'),cancel=document.getElementById('confirm-cancel');
+    ok.textContent=opts.okText||'확인';
+    ok.className=`btn ${opts.danger?'btn-danger':'btn-primary'}`;
+    const done=v=>{ov.classList.add('hidden');ok.onclick=cancel.onclick=ov.onclick=null;document.removeEventListener('keydown',onKey);resolve(v);};
+    const onKey=e=>{if(e.key==='Escape')done(false);else if(e.key==='Enter'){e.preventDefault();done(true);}};
+    ok.onclick=()=>done(true);cancel.onclick=()=>done(false);
+    ov.onclick=e=>{if(e.target===ov)done(false);};
+    document.addEventListener('keydown',onKey);
+    ov.classList.remove('hidden');
+    setTimeout(()=>cancel.focus(),0);
+  });
+}
 function closeModal(id){document.getElementById(id).classList.add('hidden');}
 function openModal(id){document.getElementById(id).classList.remove('hidden');}
 document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.add('hidden');}));
@@ -2129,7 +2181,7 @@ function saveBid(){
   showToast(msg,'success');
 }
 
-function deleteBid(idx){if(!confirm('이 입찰 항목을 삭제할까요?'))return;DB.bids.splice(idx,1);saveLS();refreshFilters();renderPage('bids');updateDataSummary();showToast('삭제되었습니다.','success');}
+async function deleteBid(idx){const b=DB.bids[idx];if(!(await askConfirm('이 입찰 항목을 삭제할까요?',{detail:b?b.사업명:'',okText:'삭제',danger:true})))return;DB.bids.splice(idx,1);saveLS();refreshFilters();renderPage('bids');updateDataSummary();showToast('삭제되었습니다.','success');}
 
 // ════════════════════════════════
 //  REVENUE GOAL FORM
@@ -2170,7 +2222,7 @@ function saveContact(){
   saveLS();refreshFilters();renderPage('contacts');updateDataSummary();
   closeModal('ct-form-modal');showToast(idx===-1?'컨택 항목이 추가되었습니다.':'컨택 항목이 수정되었습니다.','success');
 }
-function deleteContact(idx){if(!confirm('이 컨택 항목을 삭제할까요?'))return;DB.contacts.splice(idx,1);saveLS();refreshFilters();renderPage('contacts');updateDataSummary();showToast('삭제되었습니다.','success');}
+async function deleteContact(idx){const c=DB.contacts[idx];if(!(await askConfirm('이 컨택 항목을 삭제할까요?',{detail:c?[c.기관명,c.조사명].filter(Boolean).join(' · '):'',okText:'삭제',danger:true})))return;DB.contacts.splice(idx,1);saveLS();refreshFilters();renderPage('contacts');updateDataSummary();showToast('삭제되었습니다.','success');}
 
 // ════════════════════════════════
 //  RENDER HOME
@@ -2193,6 +2245,7 @@ function renderHome(){
   document.getElementById('h-sole').textContent=sole.length;
   document.getElementById('h-win').textContent=bids.filter(b=>b.결과==='수주').length;
   document.getElementById('h-lose').textContent=compLose;
+  document.getElementById('h-comp-win2').textContent=compWin;
   document.getElementById('h-rate').textContent=fmtPct(rate);
   document.getElementById('h-contact').textContent=contacts.length;
   document.getElementById('h-comp-detail').textContent=comp.length;
@@ -2225,6 +2278,7 @@ function renderHome(){
 
   // 달성률: 특정 연도 선택 시 해당 연도, 전체 시 올해 기준
   const cy=hy==='all'?now.getFullYear():parseInt(hy);
+  document.getElementById('h-achieve-label').textContent=hy==='all'?'올해 목표 달성률':`${cy}년 목표 달성률`;
   const revRow=DB.revenue.find(r=>r.연도==cy);
   const yearActual=hy==='all'
     ? DB.bids.filter(b=>b.결과==='수주'&&b.계약금액&&b.입찰일&&parseInt(b.입찰일.slice(0,4))===cy).reduce((s,b)=>s+getBidNetAmount(b),0)
@@ -2232,9 +2286,11 @@ function renderHome(){
   if(revRow&&revRow.목표){
     const pct=yearActual/revRow.목표*100;
     document.getElementById('h-achieve').textContent=fmtPct(pct);
-    document.getElementById('h-achieve-sub').textContent=`${yearActual.toLocaleString()}만 / ${revRow.목표.toLocaleString()}만`;
+    document.getElementById('h-achieve-bar').style.width=Math.min(pct,100)+'%';
+    document.getElementById('h-achieve-sub').textContent=`실적 ${Math.round(yearActual).toLocaleString()}만원 / 목표 ${Math.round(revRow.목표).toLocaleString()}만원`;
   }else{
     document.getElementById('h-achieve').textContent='—';
+    document.getElementById('h-achieve-bar').style.width='0%';
     document.getElementById('h-achieve-sub').textContent=hy==='all'?'올해 목표 미설정':'연간 목표 미설정';
   }
 
@@ -2290,6 +2346,9 @@ function renderHome(){
   document.getElementById('home-recent-tbody').innerHTML=recent.length
     ?recent.map(b=>`<tr><td>${b.입찰일||'—'}</td><td style="max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${b.사업명}</td><td>${b.발주처||'—'}</td><td>${fieldBadge(b.사업분야)}</td><td>${typeBadge(b.계약유형)}</td><td style="text-align:center;">${b.계약유형==='경쟁입찰'?b.competitors.length:'—'}</td><td>${winnerBadge(b.낙찰사,b.결과)}</td><td>${resultBadge(b.결과)}</td></tr>`).join('')
     :`<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3);">데이터 없음</td></tr>`;
+  document.getElementById('home-recent-cards').innerHTML=recent.length
+    ?recent.map(b=>`<div class="recent-mini-item" onclick="openBidDetail(${DB.bids.indexOf(b)})"><div class="recent-mini-main"><div class="recent-mini-title">${b.사업명}</div><div class="recent-mini-meta">${b.입찰일||'—'} · ${b.발주처||'—'}</div></div><div class="recent-mini-badges">${typeBadge(b.계약유형)}${resultBadge(b.결과)}</div></div>`).join('')
+    :'<div class="text-sm text-muted" style="padding:12px 0;text-align:center;">데이터 없음</div>';
 }
 
 // ════════════════════════════════
@@ -2306,11 +2365,9 @@ function renderBids(){
   document.getElementById('b-rate').textContent=fmtPct(rate);
   document.getElementById('b-comp-cnt').textContent=comp.length;
   document.getElementById('b-comp-win').textContent=compWin;
-  document.getElementById('b-comp-lose').textContent=compLose;
-  document.getElementById('b-comp-rate').textContent=fmtPct(rate);
   document.getElementById('b-sole-cnt').textContent=sole.length;
   document.getElementById('b-sole-win').textContent=sole.filter(b=>b.결과==='수주').length;
-  document.getElementById('b-sole-amt').textContent=(()=>{const a=sole.filter(b=>b.결과==='수주').reduce((s,b)=>s+(b.계약금액||0),0);return a?a.toLocaleString()+'만':'—';})();
+  document.getElementById('b-sole-amt').innerHTML=(()=>{const a=sole.filter(b=>b.결과==='수주').reduce((s,b)=>s+(b.계약금액||0),0);return a?fmtManHTML(a):'—';})();
 
   // 연도별 차트
   const allB=DB.bids,years=[...new Set(allB.map(b=>b.연도).filter(Boolean))].sort();
@@ -2337,9 +2394,9 @@ function renderBids(){
       ?`<span style="font-weight:700;font-size:12px;${costData.rate<=40?'color:var(--success)':costData.rate<=60?'color:var(--warn)':'color:var(--danger)'}">${costData.rate.toFixed(1)}%</span>`
       :`<span style="color:var(--text3);font-size:11px;">—</span>`;
     return`<tr>
-    <td>${b.연도||'—'}</td><td>${b.입찰일||'—'}</td>
+    <td>${b.입찰일||'—'}</td>
     <td class="bid-name-cell" title="${b.사업명}">${b.사업명}</td>
-    <td>${b.발주처||'—'}</td>
+    <td class="bid-org-cell" title="${b.발주처||''}">${b.발주처||'—'}</td>
     <td>${fieldBadge(b.사업분야)}</td>
     <td>${typeBadge(b.계약유형)}</td>
     <td>${fmtMoney(b.사업금액)}</td>
@@ -2354,7 +2411,7 @@ function renderBids(){
       <button class="btn-icon" onclick="openBidForm(${ri})" title="수정">✏️</button>
       <button class="btn-icon del" onclick="deleteBid(${ri})" title="삭제">🗑</button>
     </div></td>
-  </tr>`;}).join(''):`<tr><td colspan="15" style="text-align:center;padding:24px;color:var(--text3);">데이터 없음 — 우측 상단 "＋ 입찰 추가"로 입력하세요</td></tr>`;
+  </tr>`;}).join(''):`<tr><td colspan="14" style="text-align:center;padding:24px;color:var(--text3);">데이터 없음 — 우측 상단 "＋ 입찰 추가"로 입력하세요</td></tr>`;
 
   // 모바일 카드형 렌더링
   const cardsEl=document.getElementById('bids-cards');
@@ -2469,7 +2526,14 @@ function renderCompetitor(){
     if(c.기술!==null)m.techs.push(c.기술);
     if(c.가격!==null)m.prices.push(c.가격);
   }));
-  document.getElementById('comp-summary-tbody').innerHTML=Object.entries(compMap).sort((a,b)=>b[1].total-a[1].total).map(([name,d])=>`<tr style="cursor:pointer;" onclick="openCompHistoryModal('${name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')" title="${name} 대결 히스토리 보기"><td><strong>${name}</strong> <span style="font-size:11px;color:var(--text3);">↗</span></td><td>${d.total}</td><td><span class="badge badge-success">${d.ourWin}</span></td><td><span class="badge badge-danger">${d.compWin}</span></td><td>${d.total>0?(d.compWin/d.total*100).toFixed(1)+'%':'—'}</td></tr>`).join('')||`<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3);">경쟁사 데이터 없음</td></tr>`;
+  const minEl=document.getElementById('comp-min2');
+  const applyMin=cF==='all'&&minEl&&minEl.checked;
+  const allRows=Object.entries(compMap).sort((a,b)=>b[1].total-a[1].total||b[1].compWin-a[1].compWin);
+  const rows=applyMin?allRows.filter(([,d])=>d.total>=2):allRows;
+  const hiddenCnt=allRows.length-rows.length;
+  const noteEl=document.getElementById('comp-hidden-note');
+  if(noteEl){noteEl.style.display=hiddenCnt?'block':'none';noteEl.textContent=hiddenCnt?`대결 1회뿐인 경쟁사 ${hiddenCnt}곳은 숨겨져 있습니다. 위의 '2회 이상 대결한 곳만 보기'를 해제하면 모두 볼 수 있습니다.`:'';}
+  document.getElementById('comp-summary-tbody').innerHTML=rows.map(([name,d])=>`<tr class="comp-row" onclick="openCompHistoryModal('${name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')" title="${name} 대결 히스토리 보기"><td><strong>${name}</strong></td><td>${d.total}</td><td><span class="badge badge-success">${d.ourWin}</span></td><td><span class="badge badge-danger">${d.compWin}</span></td><td>${d.total>0?(d.compWin/d.total*100).toFixed(1)+'%':'—'}</td><td style="text-align:right;"><span class="comp-row-more">히스토리 ›</span></td></tr>`).join('')||`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3);">경쟁사 데이터 없음</td></tr>`;
   const sorted=[...data].filter(b=>b.competitors.length>0).sort((a,b)=>(b.입찰일||'').localeCompare(a.입찰일||''));
   document.getElementById('comp-detail-list').innerHTML=sorted.length?sorted.map(b=>{
     const idx=DB.bids.indexOf(b);
@@ -2494,10 +2558,14 @@ function renderRevenue(){
   const annualActual=getBidActual(revYear,null);
   const annualRate=annualGoal&&annualGoal>0?annualActual/annualGoal*100:null;
 
-  document.getElementById('rev-annual-goal').textContent=annualGoal?annualGoal.toLocaleString():'미설정';
-  document.getElementById('rev-annual-actual').textContent=annualActual?annualActual.toLocaleString():'0';
+  document.getElementById('rev-annual-goal').innerHTML=annualGoal?fmtManHTML(annualGoal):'미설정';
+  document.getElementById('rev-annual-actual').innerHTML=fmtManHTML(annualActual||0);
   document.getElementById('rev-annual-rate').textContent=fmtPct(annualRate);
-  document.getElementById('rev-remain').textContent=annualGoal?Math.max(0,annualGoal-annualActual).toLocaleString():'—';
+  const over=annualGoal&&annualActual>=annualGoal;
+  document.getElementById('rev-remain-card').className=`stat-card ${over?'green':'red'}`;
+  document.getElementById('rev-remain-label').textContent=over?'목표 초과':'잔여 목표';
+  document.getElementById('rev-remain-sub').textContent=over?'목표보다 더 달성한 금액':'목표까지 남은 금액';
+  document.getElementById('rev-remain').innerHTML=!annualGoal?'—':over?`<span style="color:var(--success);">+${fmtManHTML(annualActual-annualGoal)}</span>`:fmtManHTML(annualGoal-annualActual);
 
   // 월별 실적 (자동 집계)
   const monthActuals=months.map(m=>getBidActual(revYear,m));
@@ -2536,8 +2604,8 @@ function renderRevenue(){
     return`<tr>
       <td><strong>${m}월</strong></td>
       <td style="text-align:center;">${items.length?`<span class="badge badge-success">${items.length}건</span>`:'—'}</td>
-      <td>${act?act.toLocaleString():'—'}</td>
-      <td>${cumAct.toLocaleString()}</td>
+      <td>${act?Math.round(act).toLocaleString():'—'}</td>
+      <td>${Math.round(cumAct).toLocaleString()}</td>
       <td>${rb}</td>
       <td style="max-width:240px;">${itemList}</td>
     </tr>`;
@@ -2553,7 +2621,7 @@ function renderContacts(){
   document.getElementById('ct-total').textContent=data.length;
   document.getElementById('ct-active').textContent=data.filter(c=>['검토중','제안예정'].includes(c.상태)).length;
   document.getElementById('ct-win').textContent=data.filter(c=>c.상태==='수주연결').length;
-  document.getElementById('ct-budget').textContent=(()=>{const b=data.reduce((s,c)=>s+(c.예산||0),0);return b?b.toLocaleString():'—';})();
+  document.getElementById('ct-budget').innerHTML=(()=>{const b=data.reduce((s,c)=>s+(c.예산||0),0);return b?fmtManHTML(b):'—';})();
   const sts=['검토중','제안예정','제안완료','무산','수주연결'],sPal=[C.blue,C.warn,C.purple,C.red,C.green];
   dk('ct-status-chart');if(data.length)mkChart('ct-status-chart','doughnut',{labels:sts,datasets:[{data:sts.map(s=>data.filter(c=>c.상태===s).length),backgroundColor:sPal.map(c=>c+'99'),borderColor:sPal,borderWidth:2}]},{plugins:{legend:{position:'right',labels:{color:'#9EA3C0',font:{family:'Inter,Pretendard,sans-serif'}}}}});
   const yr=yF!=='all'?yF:(new Date().getFullYear()+'');
@@ -2582,7 +2650,7 @@ function downloadTemplate(type){
 }
 function exportJSON(){ensureMeta();syncSharedPasswords();DB.meta.lastUpdate=new Date().toISOString();const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='data.json';a.click();document.getElementById('json-status').textContent='✅ data.json 백업 다운로드 완료.';showToast('JSON 백업 완료','success');}
 function importJSON(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const j=JSON.parse(e.target.result);if(j.bids)DB.bids=j.bids;if(j.revenue)DB.revenue=j.revenue;if(j.contacts)DB.contacts=j.contacts||[];if(j.costs)DB.costs=j.costs||[];if(j.meta)DB.meta=j.meta;syncSharedPasswords();saveLS();refreshFilters();renderPage('home');updateDataSummary();document.getElementById('json-status').textContent=`✅ 불러오기 완료 (입찰 ${DB.bids.length}건 / 목표 ${DB.revenue.length}개 연도 / 컨택 ${DB.contacts.length}건 / 비용 ${DB.costs.length}건)`;showToast('JSON 불러오기 완료','success');}catch(err){showToast('JSON 오류: '+err.message,'error');}event.target.value='';};reader.readAsText(file);}
-function clearData(type){const label={bids:'입찰 내역',contacts:'컨택 내역'}[type];if(!confirm(`${label} 데이터를 초기화할까요?`))return;if(type==='bids')DB.bids=[];else DB.contacts=[];saveLS();refreshFilters();renderPage('home');updateDataSummary();showToast('데이터가 초기화되었습니다.','success');}
+async function clearData(type){const label={bids:'입찰 내역',contacts:'컨택 내역'}[type];if(!(await askConfirm(`${label} 데이터를 초기화할까요?`,{detail:'모든 항목이 지워지며 되돌릴 수 없습니다.',okText:'초기화',danger:true})))return;if(type==='bids')DB.bids=[];else DB.contacts=[];saveLS();refreshFilters();renderPage('home');updateDataSummary();showToast('데이터가 초기화되었습니다.','success');}
 function updateDataSummary(){
   document.getElementById('data-bid-count').textContent=DB.bids.length;
   document.getElementById('data-rev-count').textContent=DB.revenue.length;
@@ -2604,7 +2672,7 @@ function updateDataSummary(){
 // ════════════════════════════════
 //  FILTER LISTENERS (탭은 onclick으로 처리, 검색창만 여기서)
 // ════════════════════════════════
-document.getElementById('bid-search').addEventListener('input',()=>{resetBidListVisible();renderBids();});
+document.getElementById('bid-search').addEventListener('input',()=>{resetBidListVisible();updateBidFilterReset();renderBids();});
 document.getElementById('ct-search').addEventListener('input',renderContacts);
 
 // ════════════════════════════════
@@ -2683,7 +2751,7 @@ function calcCostTotal(){
   document.getElementById('cf2-rate-display').textContent=rate!==null?rate.toFixed(1)+'%':'—';
 }
 
-function saveCost(){
+async function saveCost(){
   const bidIdxVal=document.getElementById('cf2-project').value;
   if(!bidIdxVal){showToast('프로젝트를 선택하세요.','error');return;}
   const bidIdx=parseInt(bidIdxVal);
@@ -2714,15 +2782,15 @@ function saveCost(){
   const idx=parseInt(document.getElementById('cf2-idx').value);
   // 같은 프로젝트 중복 체크 (수정 시 제외)
   const dup=DB.costs.findIndex((c,i)=>c.bidIdx===bidIdx&&i!==idx);
-  if(dup!==-1){if(!confirm('이 프로젝트의 비용 데이터가 이미 있습니다. 덮어쓸까요?'))return;DB.costs.splice(dup,1);}
+  if(dup!==-1){if(!(await askConfirm('이 프로젝트의 비용 데이터가 이미 있습니다. 덮어쓸까요?',{okText:'덮어쓰기'})))return;DB.costs.splice(dup,1);}
   if(idx===-1)DB.costs.push(cost);else DB.costs[idx]=cost;
   saveLS();renderPage('costs');renderBids();
   closeModal('cost-form-modal');
   showToast('비용 데이터가 저장되었습니다.','success');
 }
 
-function deleteCost(idx){
-  if(!confirm('이 비용 데이터를 삭제할까요?'))return;
+async function deleteCost(idx){
+  if(!(await askConfirm('이 비용 데이터를 삭제할까요?',{okText:'삭제',danger:true})))return;
   DB.costs.splice(idx,1);
   saveLS();renderPage('costs');renderBids();
   showToast('삭제되었습니다.','success');
@@ -2737,7 +2805,7 @@ function renderCosts(){
   const aggregateRate=calcAggregateCostRate(costs);
   document.getElementById('cost-avg-rate').textContent=aggregateRate!==null?aggregateRate.toFixed(1)+'%':'—';
   const totalContract=costs.reduce((s,c)=>s+(c.contract||0),0);
-  document.getElementById('cost-total-contract').textContent=totalContract?totalContract.toLocaleString():'—';
+  document.getElementById('cost-total-contract').innerHTML=totalContract?fmtManHTML(totalContract):'—';
 
   const rateColor=r=>r===null?'':r<=40?'color:var(--success)':r<=60?'color:var(--warn)':'color:var(--danger)';
   const sortedCosts=costs.map((c,i)=>({c,i})).sort((a,b)=>{
@@ -2781,6 +2849,5 @@ function renderCosts(){
 function renderPage(n){if(n==='home')renderHome();else if(n==='bids')renderBids();else if(n==='competitor')renderCompetitor();else if(n==='revenue')renderRevenue();else if(n==='contacts')renderContacts();else if(n==='costs')renderCosts();else if(n==='data')updateDataSummary();}
 (async()=>{setBidNameColWidth(getBidNameColWidth());loadLS();loadVersionLS();await loadDataJSON();await loadVersionHistory();const pwChanged=syncSharedPasswords();if(pwChanged)saveLS();refreshFilters();renderPage('home');updateDataSummary();mountAppSyncIndicator();initTheme();})();
 </script>
-<button class="theme-fab" id="theme-fab" onclick="toggleTheme()" title="다크/라이트 모드 전환">🌙</button>
 </body>
 </html>
