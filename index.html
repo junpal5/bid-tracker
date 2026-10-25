@@ -454,6 +454,35 @@ tr:hover td{background:rgba(30,78,140,.03)}
 .sidebar .app-sync-indicator.sync-idle{color:rgba(255,255,255,.6)}
 body::before,body::after{display:none}
 </style>
+<style id="design-refine">
+/* 디자인 정리(v1.7): 효과 절제 · 여백 촘촘하게 — 라이트/다크 공통 */
+:root{--radius:10px;--radius2:8px}
+body{background:var(--bg)}
+/* 카드: 색 띠·떠오르는 효과 제거, 그림자 최소화 */
+.stat-card::before{display:none}
+.card,.stat-card,.summary-card,.score-compare-trigger,.version-history-item{box-shadow:0 1px 2px rgba(15,30,58,.05)}
+.summary-card:hover,.score-compare-trigger:hover{transform:none;box-shadow:0 1px 2px rgba(15,30,58,.05);border-color:var(--accent)}
+/* 버튼·탭: 그라데이션/빛 번짐 대신 단색 */
+.btn-primary{background:var(--accent);box-shadow:none}
+.btn-primary:hover{background:var(--accent);filter:brightness(1.1);transform:none;box-shadow:none}
+.btn-danger{background:var(--danger)}
+.tab-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:none}
+.kpi-progress-fill{background:var(--warn)}
+/* 표: 줄 높이 낮추기 */
+td .btn-icon{padding:2px 6px;font-size:13px;line-height:1.4}
+@media(min-width:601px){
+  .grid2,.grid3,.grid4,.grid5{gap:12px}
+  .mb16{margin-bottom:12px}
+  .page-header{margin-bottom:20px}
+  .page-header-left h2{font-size:20px}
+  td{padding:8px 12px}
+  th{padding:9px 12px}
+  .filter-bar .filter-search{width:280px}
+}
+@media(min-width:901px){
+  .main{padding:20px 24px}
+}
+</style>
 <script>
 /* 테마 FOUC 방지: 페이지 렌더 전 저장된 테마 즉시 적용 */
 (function(){if(localStorage.getItem('dashboard_theme')==='dark'){var s=document.getElementById('glassmorphism-override');if(s)s.disabled=true;}})();
@@ -545,7 +574,7 @@ body::before,body::after{display:none}
         <div style="flex:1;height:1px;background:var(--border);"></div>
         <div style="text-align:center;"><div class="stat-label">수의 계약</div><div style="font-size:28px;font-weight:800;color:var(--indigo);" id="h-sole-detail">0</div><div style="font-size:11px;color:var(--text3);">수주 <span id="h-sole-win" style="color:var(--success);">0</span></div></div>
       </div>
-      <div style="margin-top:12px;"><div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;"><div id="h-type-bar" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--indigo));border-radius:4px;transition:width .8s;width:0%;"></div></div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px;"><span>← 경쟁</span><span>수의 →</span></div></div>
+      <div style="margin-top:12px;"><div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;"><div id="h-type-bar" style="height:100%;background:var(--accent);border-radius:4px;transition:width .8s;width:0%;"></div></div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px;"><span>← 경쟁</span><span>수의 →</span></div></div>
     </div>
     <div class="card"><div class="card-title">최근 컨택 현황 <span class="card-title-count">전체 <span id="h-contact">0</span>건</span></div><div id="home-contact-list"></div></div>
   </div>
