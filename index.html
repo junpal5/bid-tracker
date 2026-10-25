@@ -455,6 +455,15 @@ tr:hover td{background:rgba(30,78,140,.03)}
 .sidebar .app-sync-indicator.sync-idle{color:rgba(255,255,255,.6)}
 body::before,body::after{display:none}
 </style>
+<style id="cost-check-style">
+.cost-alert{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;padding:12px 16px;margin-bottom:12px;border:1px solid rgba(239,68,68,.45);border-left:4px solid var(--danger);border-radius:var(--radius2);background:rgba(239,68,68,.08);font-size:13px;line-height:1.6}
+.cost-alert strong{color:var(--danger);font-weight:700}
+.cost-alert span{color:var(--text);flex:1;min-width:200px}
+.cost-alert a{color:var(--accent);font-weight:600;text-decoration:none;white-space:nowrap}
+.cost-check-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+tr.cost-check-warn td{background:rgba(239,68,68,.06)}
+.cost-ref{display:inline-block;white-space:nowrap;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:600;color:var(--warn);border:1px solid rgba(245,158,11,.45)}
+</style>
 <style id="design-refine">
 /* 디자인 정리(v1.7): 효과 절제 · 여백 촘촘하게 — 라이트/다크 공통 */
 :root{--radius:10px;--radius2:8px}
@@ -555,6 +564,7 @@ td .btn-icon{padding:2px 6px;font-size:13px;line-height:1.4}
   <div class="page-header">
     <div class="page-header-left"><h2>📊 전체 현황 요약</h2><p id="homeDate"></p></div>
   </div>
+  <div id="home-cost-alert"></div>
   <div class="filter-row mb16">
     <span class="filter-label">연도</span>
     <div class="tab-filters" id="home-year-tabs">
@@ -728,6 +738,27 @@ td .btn-icon{padding:2px 6px;font-size:13px;line-height:1.4}
       <button class="btn btn-primary" onclick="openCostForm()">＋ 비용 입력</button>
       <button class="btn btn-outline" onclick="openCostPwChange()">🔒 비밀번호 변경</button>
     </div>
+  </div>
+
+  <div id="costs-cost-alert"></div>
+  <!-- 실시간 비용률 점검 -->
+  <div class="card mb16" id="cost-check-card">
+    <div class="cost-check-head">
+      <div><div class="card-title" style="margin-bottom:4px;">실시간 비용률 점검</div><div class="text-sm text-muted">예상 비용률이 표준기안보다 5%p 이상 높으면 경고합니다.</div></div>
+      <div class="flex gap8" style="flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="pickCheckFile('plan')">📄 표준기안 올리기</button>
+        <button class="btn btn-outline btn-sm" onclick="pickCheckFile('pms')">📥 PMS 예산/집행 올리기</button>
+        <button class="btn btn-outline btn-sm" onclick="openPlanForm()">✏️ 기안 비용률 직접 입력</button>
+      </div>
+    </div>
+    <input type="file" id="check-file-input" style="display:none" onchange="onCheckFile(event)">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>사업명</th><th>표준기안 비용률</th><th>현재 집행률</th><th>예상 비용률</th><th>차이</th><th>상태</th><th>참고</th><th>PMS 조회일</th><th>관리</th></tr></thead>
+        <tbody id="cost-check-tbody"></tbody>
+      </table>
+    </div>
+    <div class="text-sm text-muted" style="margin-top:10px;line-height:1.6;">예상 비용률 = (PMS 누계 집행액 + 세부조사별 남은 실사예산 + 기타추가경비·간접비·추가예상비용) ÷ 계약금액(VAT 제외). 이미 예산을 넘긴 세부조사는 집행액을 그대로 씁니다. 세부조사 단위 예산 초과는 '참고'로만 표시합니다.</div>
   </div>
 
   <!-- 요약 카드 -->
@@ -947,6 +978,38 @@ td .btn-icon{padding:2px 6px;font-size:13px;line-height:1.4}
 </div>
 
 <!-- ══ MODAL: 비용 입력/수정 ══ -->
+<div class="modal-overlay hidden" id="plan-form-modal">
+<div class="modal modal-sm">
+  <h3><span>표준기안 비용률 입력</span><button class="modal-close" onclick="closeModal('plan-form-modal')">✕</button></h3>
+  <div class="form-group"><label class="form-label">프로젝트 *</label><select id="pf-project" onchange="onPlanProjectChange()"></select></div>
+  <div class="form-group"><label class="form-label">계약금액 (VAT 별도, 원)</label><input type="text" id="pf-contract" placeholder="예: 122600000" oninput="calcPlanForm()"></div>
+  <div class="form-group"><label class="form-label">예상 직접비 (원)</label><input type="text" id="pf-direct" placeholder="예: 66325000" oninput="calcPlanForm()"></div>
+  <div class="form-group"><label class="form-label">또는 비용률 직접 입력 (%)</label><input type="number" step="0.1" id="pf-rate" placeholder="예상 직접비를 모를 때만" oninput="calcPlanForm()"></div>
+  <div class="calc-result">표준기안 비용률: <span id="pf-rate-display">—</span></div>
+  <div id="pf-error" style="color:var(--danger);font-size:12px;margin-top:8px;display:none;"></div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('plan-form-modal')">취소</button>
+    <button class="btn btn-primary" onclick="savePlanForm()">저장</button>
+  </div>
+</div>
+</div>
+<div class="modal-overlay hidden" id="check-confirm-modal">
+<div class="modal">
+  <h3><span id="check-confirm-title">읽기 결과 확인</span><button class="modal-close" onclick="closeModal('check-confirm-modal')">✕</button></h3>
+  <div id="check-confirm-body"></div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('check-confirm-modal')">취소</button>
+    <button class="btn btn-primary" onclick="saveCheckConfirm()">반영</button>
+  </div>
+</div>
+</div>
+<div class="modal-overlay hidden" id="check-detail-modal">
+<div class="modal">
+  <h3><span id="check-detail-title">비용률 점검 상세</span><button class="modal-close" onclick="closeModal('check-detail-modal')">✕</button></h3>
+  <div id="check-detail-body"></div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('check-detail-modal')">닫기</button></div>
+</div>
+</div>
 <div class="modal-overlay hidden" id="cost-form-modal">
 <div class="modal">
   <h3><span id="cost-form-title">비용 입력</span><button class="modal-close" onclick="closeModal('cost-form-modal')">✕</button></h3>
@@ -1209,7 +1272,7 @@ function toggleTheme(){
 //  revenue: [{ 연도:2025, 목표:100000 }]  ← 연간 목표만 저장
 //  월별 실적은 bids에서 자동 계산
 // ════════════════════════════════
-let DB={bids:[],revenue:[],contacts:[],costs:[],costsEnc:null,meta:{lastUpdate:null,dataPw:null}};
+let DB={bids:[],revenue:[],contacts:[],costs:[],costChecks:[],costsEnc:null,meta:{lastUpdate:null,dataPw:null}};
 let VERSION_DATA={currentVersion:'v1.0.0',history:[]};
 const charts={};
 const MAX_COMP=10;
@@ -1251,8 +1314,8 @@ async function deriveCostKey(pw,saltB64,iter){
   const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
   return crypto.subtle.deriveKey({name:'PBKDF2',salt:bytesFromB64(saltB64),iterations:iter||COST_ENC_ITER,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
 }
-function getCostSecurePayload(){return{costs:DB.costs};}
-function applyCostSecurePayload(p){DB.costs=Array.isArray(p&&p.costs)?p.costs:[];}
+function getCostSecurePayload(){return{costs:DB.costs,costChecks:DB.costChecks||[]};}
+function applyCostSecurePayload(p){DB.costs=Array.isArray(p&&p.costs)?p.costs:[];DB.costChecks=Array.isArray(p&&p.costChecks)?p.costChecks:[];}
 async function encryptCostPayload(){
   const iv=crypto.getRandomValues(new Uint8Array(12));
   const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},COST_KEY,new TextEncoder().encode(JSON.stringify(getCostSecurePayload())));
@@ -1285,7 +1348,7 @@ async function unlockCosts(pw){
     return false;
   }
 }
-function lockCosts(){COST_KEY=null;COST_SALT=null;DB.costs=[];try{sessionStorage.removeItem(COST_SESSION_KEY);}catch(e){}}
+function lockCosts(){COST_KEY=null;COST_SALT=null;DB.costs=[];DB.costChecks=[];try{sessionStorage.removeItem(COST_SESSION_KEY);}catch(e){}}
 async function tryAutoUnlockCosts(){
   if(COST_KEY)return true;
   let pw=null;try{pw=sessionStorage.getItem(COST_SESSION_KEY);}catch(e){}
@@ -1297,8 +1360,12 @@ async function tryAutoUnlockCosts(){
 // 저장용 복사본: 평문 costs는 빼고 costsEnc만 남긴다
 async function serializeDB(){
   ensureMeta();
-  if(COST_KEY)DB.costsEnc=await encryptCostPayload();
+  if(COST_KEY){
+    DB.meta.costWarnCount=getCostWarnings().length; // 잠긴 상태의 홈 알림용(건수만 공개)
+    DB.costsEnc=await encryptCostPayload();
+  }
   const out={...DB,costs:[],meta:{...DB.meta}};
+  delete out.costChecks;
   delete out.meta.costPw;
   return out;
 }
@@ -1307,7 +1374,7 @@ function applyLoadedCosts(j){
   if(j.costsEnc&&j.costsEnc.ct){
     const changed=!DB.costsEnc||DB.costsEnc.ct!==j.costsEnc.ct;
     DB.costsEnc=j.costsEnc;
-    if(changed){COST_KEY=null;COST_SALT=null;DB.costs=[];}
+    if(changed){COST_KEY=null;COST_SALT=null;DB.costs=[];DB.costChecks=[];}
   }
 }
 
@@ -2379,6 +2446,7 @@ async function deleteContact(idx){const c=DB.contacts[idx];if(!(await askConfirm
 //  RENDER HOME
 // ════════════════════════════════
 function renderHome(){
+  renderCostAlert('home-cost-alert');
   const now=new Date();
   const hy=HF.year; // 홈 연도 필터 ('all' 또는 특정 연도)
 
@@ -2976,6 +3044,7 @@ async function deleteCost(idx){
 //  RENDER COSTS
 // ════════════════════════════════
 function renderCosts(){
+  renderCostChecks();
   const costs=DB.costs.filter(c=>COSTF.year==='all'||String(c.연도)===String(COSTF.year));
   document.getElementById('cost-count').textContent=costs.length;
   const aggregateRate=calcAggregateCostRate(costs);
@@ -3020,6 +3089,380 @@ function renderCosts(){
       <button class="btn-icon del" onclick="deleteCost(${i})" title="삭제">🗑</button>
     </div></td>
   </tr>`).join(''):`<tr><td colspan="15" style="text-align:center;padding:32px;color:var(--text3);">비용 데이터 없음 — "＋ 비용 입력" 버튼으로 등록하세요</td></tr>`;
+}
+
+// ════════════════════════════════
+//  실시간 비용률 점검 (표준기안 vs PMS 예산/집행)
+//  - 기준선: 표준기안 예상직접비 ÷ 계약금액(VAT 제외)
+//  - 예상 비용률: (세부조사별 max(실사예산, 누계집행) 합 + 기타추가경비·간접비·추가예상비용) ÷ 계약금액(VAT 제외)
+//  - 예상이 기준보다 COST_WARN_GAP(%p) 이상 높으면 경고. 세부조사 단위 예산 초과는 '참고'로만 표시
+//  자료(DB.costChecks)는 비용 자료와 함께 암호화되어 저장된다. 금액 단위: 원
+// ════════════════════════════════
+const COST_WARN_GAP=5;
+const PDFJS_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const PDFJS_WORKER_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+const PMS_COLMAP_KEY='pms_col_map';
+let CHECK_KIND='pms';
+let CHECK_DRAFT=null; // 확인 화면에 띄운 읽기 결과
+
+function getCostChecks(){if(!Array.isArray(DB.costChecks))DB.costChecks=[];return DB.costChecks;}
+function escH(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function parseWon(s){const n=parseInt(String(s??'').replace(/[^\d-]/g,''),10);return isNaN(n)?null:n;}
+function fmtWon(w){return w==null||isNaN(w)?'—':Math.round(w).toLocaleString()+'원';}
+function fmtWonMan(w){return w==null||isNaN(w)?'—':Math.round(w/10000).toLocaleString()+'만원';}
+function fmtGap(g){return g==null||isNaN(g)?'—':(g>0?'+':'')+g.toFixed(1)+'%p';}
+function bidContractExVatWon(bidIdx){const b=DB.bids[bidIdx];return b&&b.계약금액?Math.round(b.계약금액/1.1*10000):null;}
+function normName(s){return String(s||'').replace(/\d{4}\s*년?/g,'').replace(/[\s<>()\[\]·\-_.,:'"]/g,'').toLowerCase();}
+function bigramSim(a,b){const g=s=>{const r=new Set();for(let i=0;i<s.length-1;i++)r.add(s.slice(i,i+2));return r;};const A=g(a),B=g(b);if(!A.size||!B.size)return 0;let c=0;A.forEach(x=>{if(B.has(x))c++;});return 2*c/(A.size+B.size);}
+// 파일에서 읽은 사업명·계약금액으로 수주 프로젝트 찾기
+function matchWonBid(name,contractWon){
+  const n=normName(name);let best=null,bestScore=0;
+  DB.bids.forEach((b,i)=>{
+    if(b.결과!=='수주')return;
+    const m=normName(b.사업명);let sc=0;
+    if(n&&m&&n===m)sc=100;else if(n&&m&&(n.includes(m)||m.includes(n)))sc=80;else sc=bigramSim(n,m)*70;
+    const ex=bidContractExVatWon(i);
+    if(contractWon&&ex&&Math.abs(ex-contractWon)/contractWon<0.01)sc+=20;
+    if(sc>bestScore){bestScore=sc;best=i;}
+  });
+  return bestScore>=40?best:null;
+}
+function wonBidOptions(selected){
+  return '<option value="">— 수주 프로젝트 선택 —</option>'+DB.bids.map((b,i)=>{
+    if(b.결과!=='수주')return '';
+    return `<option value="${i}" ${String(i)===String(selected)?'selected':''}>${escH(b.사업명)} (${escH(b.입찰일||b.연도||'')})</option>`;
+  }).join('');
+}
+
+function calcCostCheck(ck){
+  const contract=(ck.plan&&ck.plan.contractWon)||bidContractExVatWon(ck.bidIdx);
+  const planRate=ck.plan&&ck.plan.rate!=null?ck.plan.rate:null;
+  const subs=(ck.pms&&ck.pms.subs)||[];
+  const budget=subs.reduce((s,x)=>s+(x.budget||0),0);
+  const spent=subs.reduce((s,x)=>s+(x.spent||0),0);
+  const pmsForecast=subs.reduce((s,x)=>s+Math.max(x.budget||0,x.spent||0),0);
+  const cost=DB.costs.find(c=>c.bidIdx===ck.bidIdx);
+  const otherWon=cost?((cost.extra||0)+(cost.indirect||0)+(cost.additional||0))*10000:0;
+  const hasPms=subs.length>0;
+  const forecastRate=hasPms&&contract?(pmsForecast+otherWon)/contract*100:null;
+  const currentRate=hasPms&&contract?spent/contract*100:null;
+  const gap=forecastRate!=null&&planRate!=null?forecastRate-planRate:null;
+  const overSubs=subs.filter(x=>(x.spent||0)>(x.budget||0));
+  const status=gap==null?'pending':gap>=COST_WARN_GAP?'warn':'ok';
+  return{contract,planRate,budget,spent,pmsForecast,otherWon,forecastRate,currentRate,gap,overSubs,status};
+}
+function getCostWarnings(){
+  return getCostChecks().map(ck=>({ck,r:calcCostCheck(ck)})).filter(x=>x.r.status==='warn');
+}
+
+// ── 경고 표시 (홈 상단 · 비용률 화면 상단) ──
+function renderCostAlert(elId){
+  const el=document.getElementById(elId);if(!el)return;
+  if(!isCostUnlocked()){
+    const n=(DB.meta&&DB.meta.costWarnCount)||0;
+    el.innerHTML=n>0?`<div class="cost-alert"><strong>⚠ 비용률 경고 ${n}건</strong><span>예상 비용률이 표준기안보다 ${COST_WARN_GAP}%p 이상 높은 프로젝트가 있습니다.</span><a href="#" onclick="tryOpenCosts(event);return false;">비밀번호 입력 후 확인 →</a></div>`:'';
+    return;
+  }
+  const warns=getCostWarnings();
+  el.innerHTML=warns.length?`<div class="cost-alert"><strong>⚠ 비용률 경고 ${warns.length}건</strong><span>${warns.map(({ck,r})=>`${escH(ck.사업명)} — 예상 ${fmtPct(r.forecastRate)} / 기안 ${fmtPct(r.planRate)} (${fmtGap(r.gap)})`).join('<br>')}</span>${elId==='home-cost-alert'?'<a href="#" onclick="tryOpenCosts(event);return false;">비용률 점검 보기 →</a>':''}</div>`:'';
+}
+
+function renderCostChecks(){
+  renderCostAlert('costs-cost-alert');
+  const tb=document.getElementById('cost-check-tbody');if(!tb)return;
+  const list=getCostChecks();
+  tb.innerHTML=list.length?list.map((ck,i)=>{
+    const r=calcCostCheck(ck);
+    const st=r.status==='warn'?'<span class="badge badge-danger">⚠ 경고</span>':r.status==='ok'?'<span class="badge badge-success">정상</span>':`<span class="badge badge-warn">${!ck.plan?'기안 필요':'PMS 필요'}</span>`;
+    const gapStyle=r.status==='warn'?'color:var(--danger);font-weight:800':r.gap!=null&&r.gap>0?'color:var(--warn);font-weight:700':'';
+    const note=r.overSubs.length?`<span class="cost-ref" title="${escH(r.overSubs.map(x=>x.name).join(', '))}">참고: 세부조사 ${r.overSubs.length}건 예산 초과</span>`:'<span class="text-muted">—</span>';
+    return`<tr class="${r.status==='warn'?'cost-check-warn':''}">
+      <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escH(ck.사업명)}">${escH(ck.사업명)}</td>
+      <td>${fmtPct(r.planRate)}</td>
+      <td>${fmtPct(r.currentRate)}</td>
+      <td style="font-weight:700;">${fmtPct(r.forecastRate)}</td>
+      <td style="${gapStyle}">${fmtGap(r.gap)}</td>
+      <td>${st}</td>
+      <td>${note}</td>
+      <td class="text-muted">${escH((ck.pms&&ck.pms.queryDate)||'—')}</td>
+      <td><div class="action-cell">
+        <button class="btn-icon" onclick="openCheckDetail(${i})" title="상세">👁</button>
+        <button class="btn-icon" onclick="openPlanForm(${i})" title="기안 비용률 수정">✏️</button>
+        <button class="btn-icon del" onclick="deleteCheck(${i})" title="삭제">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--text3);">점검 중인 프로젝트 없음 — 표준기안 또는 PMS 파일을 올려 시작하세요</td></tr>`;
+}
+
+function upsertCheck(bidIdx,patch){
+  const list=getCostChecks();
+  let ck=list.find(c=>c.bidIdx===bidIdx);
+  if(!ck){ck={bidIdx,사업명:DB.bids[bidIdx]?.사업명||''};list.push(ck);}
+  Object.assign(ck,patch,{사업명:DB.bids[bidIdx]?.사업명||ck.사업명,updatedAt:new Date().toISOString()});
+  return ck;
+}
+async function deleteCheck(i){
+  const ck=getCostChecks()[i];if(!ck)return;
+  if(!(await askConfirm('이 프로젝트의 비용률 점검 자료를 삭제할까요?',{detail:ck.사업명,okText:'삭제',danger:true})))return;
+  getCostChecks().splice(i,1);saveLS();renderCosts();
+}
+
+// ── 기안 비용률 직접 입력 ──
+function openPlanForm(i){
+  const ck=i!==undefined?getCostChecks()[i]:null;
+  document.getElementById('pf-project').innerHTML=wonBidOptions(ck?ck.bidIdx:'');
+  document.getElementById('pf-contract').value=ck&&ck.plan&&ck.plan.contractWon?ck.plan.contractWon:(ck?bidContractExVatWon(ck.bidIdx)||'':'');
+  document.getElementById('pf-direct').value=ck&&ck.plan&&ck.plan.directWon?ck.plan.directWon:'';
+  document.getElementById('pf-rate').value=ck&&ck.plan&&ck.plan.rate!=null&&!ck.plan.directWon?ck.plan.rate.toFixed(1):'';
+  document.getElementById('pf-error').style.display='none';
+  calcPlanForm();openModal('plan-form-modal');
+}
+function onPlanProjectChange(){
+  const idx=parseInt(document.getElementById('pf-project').value,10);
+  if(!isNaN(idx)&&!document.getElementById('pf-contract').value)document.getElementById('pf-contract').value=bidContractExVatWon(idx)||'';
+  calcPlanForm();
+}
+function calcPlanForm(){
+  const c=parseWon(document.getElementById('pf-contract').value),d=parseWon(document.getElementById('pf-direct').value);
+  const rateIn=parseFloat(document.getElementById('pf-rate').value);
+  const rate=c&&d?d/c*100:(!isNaN(rateIn)?rateIn:null);
+  document.getElementById('pf-rate-display').textContent=rate!=null?rate.toFixed(1)+'%':'—';
+  return{c,d,rate};
+}
+function savePlanForm(){
+  const idx=parseInt(document.getElementById('pf-project').value,10);
+  const {c,d,rate}=calcPlanForm();
+  const err=document.getElementById('pf-error');
+  if(isNaN(idx)){err.textContent='프로젝트를 선택하세요.';err.style.display='block';return;}
+  if(rate==null){err.textContent='예상 직접비 또는 비용률을 입력하세요.';err.style.display='block';return;}
+  const prev=getCostChecks().find(x=>x.bidIdx===idx);
+  upsertCheck(idx,{plan:{...(prev&&prev.plan||{}),contractWon:c||null,directWon:d||null,rate,source:'manual',savedAt:new Date().toISOString()}});
+  saveLS();closeModal('plan-form-modal');renderCosts();showToast('표준기안 비용률을 저장했습니다.','success');
+}
+
+// ── 파일 읽기 공통 ──
+function loadScriptOnce(src,globalName){
+  if(window[globalName])return Promise.resolve(window[globalName]);
+  return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=()=>res(window[globalName]);s.onerror=()=>rej(new Error('읽기 도구를 불러오지 못했습니다. 인터넷 연결을 확인하세요.'));document.head.appendChild(s);});
+}
+// PDF → 줄 단위 텍스트(같은 높이의 글자를 한 줄로)
+async function extractPdfLines(file){
+  const pdfjs=await loadScriptOnce(PDFJS_URL,'pdfjsLib');
+  pdfjs.GlobalWorkerOptions.workerSrc=PDFJS_WORKER_URL;
+  const doc=await pdfjs.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+  const lines=[];
+  for(let p=1;p<=doc.numPages;p++){
+    const tc=await (await doc.getPage(p)).getTextContent();
+    const rows=[];
+    tc.items.forEach(it=>{
+      if(!it.str||!it.str.trim())return;
+      const x=it.transform[4],y=it.transform[5];
+      let row=rows.find(r=>Math.abs(r.y-y)<2.5);
+      if(!row){row={y,items:[]};rows.push(row);}
+      row.items.push({x,w:it.width||0,s:it.str});
+    });
+    rows.sort((a,b)=>b.y-a.y).forEach(r=>{
+      r.items.sort((a,b)=>a.x-b.x);
+      let line='',end=null;
+      r.items.forEach(it=>{line+=(end!==null&&it.x-end>1.5?' ':'')+it.s;end=it.x+it.w;});
+      lines.push(line.replace(/\s+/g,' ').trim());
+    });
+  }
+  return lines;
+}
+// HTML → 줄 단위 텍스트 (스크립트·이미지는 제거하고 화면 밖에서 글자만 읽음)
+async function extractHtmlLines(file){
+  const doc=new DOMParser().parseFromString(await file.text(),'text/html');
+  doc.querySelectorAll('script,style,iframe,object,embed,img,link,meta').forEach(n=>n.remove());
+  doc.querySelectorAll('*').forEach(n=>[...n.attributes].forEach(a=>{if(/^on/i.test(a.name))n.removeAttribute(a.name);}));
+  const box=document.createElement('div');
+  box.style.cssText='position:absolute;left:-99999px;top:0;width:1200px;';
+  box.innerHTML=doc.body?doc.body.innerHTML:'';
+  document.body.appendChild(box);
+  const text=box.innerText;box.remove();
+  return text.split(/\n+/).map(s=>s.replace(/\s+/g,' ').trim()).filter(Boolean);
+}
+async function extractSheetRows(file){
+  const XLSX=await loadScriptOnce(XLSX_URL,'XLSX');
+  const wb=XLSX.read(new Uint8Array(await file.arrayBuffer()),{type:'array'});
+  const rows=[];
+  wb.SheetNames.forEach(n=>{XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:false,defval:''}).forEach(r=>rows.push(r.map(v=>String(v??'').trim())));});
+  return rows;
+}
+
+// ── 표준기안서 읽기 ──
+function parsePlanText(lines){
+  const t=lines.join('\n');
+  const m=re=>{const x=t.match(re);return x?x[1].trim():null;};
+  const name=m(/조사명\s*[:：]\s*([^\n]+)/)||m(/제\s*목\s*<([^>]+)>/);
+  const contractWon=parseWon(m(/계약\s*금액[^:：\n]*[:：]\s*([\d,]+)\s*원/));
+  const directWon=parseWon(m(/예상\s*직접비[^:：\n]*[:：]\s*([\d,]+)\s*원/));
+  const stated=m(/예상\s*직접비[^\n]*?([\d.]+)\s*%/);
+  const outsourceWon=parseWon(m(/외주\s*경비[^\n]*?中\s*([\d,]+)\s*원/)||m(/외주\s*경비\s*[:：]\s*([\d,]+)\s*원/));
+  const rate=contractWon&&directWon?directWon/contractWon*100:(stated?parseFloat(stated):null);
+  return{name,client:m(/발주처\s*[:：]\s*([^\n]+)/),contractWon,directWon,statedRate:stated?parseFloat(stated):null,outsourceWon,
+    period:m(/계약\s*기간\s*[:：]\s*([^\n]+)/),docNo:m(/문서번호\s*(\S+)/),rate};
+}
+
+// ── PMS 예산/집행결과 읽기 (조사의뢰코드 단위 요약표) ──
+function parsePmsLines(lines){
+  const t=lines.join('\n');
+  const title=(lines.find(l=>/예산\s*\/?\s*집행/.test(l))||lines[0]||'').split(/\s[—–-]\s/)[0].trim();
+  const names={};
+  lines.forEach(l=>{const x=l.match(/^(\d{4}-\d{3}-\d{3}-\d{2})\s*·\s*(.+)$/);if(x)names[x[1]]=x[2].trim();});
+  const subs=[];
+  lines.forEach(l=>{
+    const x=l.match(/^(\d{4}-\d{3}-\d{3}-\d{2})\s+(.*?)\s*([\d,]+)\s+([\d,]+)\s+[\d.]+\s*%\s+([\d,]+)\s+[\d.]+\s*%\s*$/);
+    if(!x||subs.some(s=>s.code===x[1]))return;
+    subs.push({code:x[1],name:names[x[1]]||x[2].trim(),alloc:parseWon(x[3]),budget:parseWon(x[4]),spent:parseWon(x[5])});
+  });
+  const q=t.match(/조회일\s*(\d{4}[-.]\d{2}[-.]\d{2})/),s=t.match(/정산월\s*([\d.]+)/),c=t.match(/총\s*계약\s*금액\s*([\d,]+)\s*원/);
+  return{title,contractWon:c?parseWon(c[1]):null,queryDate:q?q[1]:null,settleMonth:s?s[1]:null,subs};
+}
+
+function pickCheckFile(kind){
+  CHECK_KIND=kind;
+  const inp=document.getElementById('check-file-input');
+  inp.accept=kind==='plan'?'.pdf,.html,.htm':'.xlsx,.xls,.csv,.pdf';
+  inp.value='';inp.click();
+}
+async function onCheckFile(e){
+  const file=e.target.files&&e.target.files[0];if(!file)return;
+  const ext=(file.name.split('.').pop()||'').toLowerCase();
+  showToast('파일을 읽는 중입니다…','success');
+  try{
+    if(CHECK_KIND==='plan'){
+      const lines=ext==='pdf'?await extractPdfLines(file):await extractHtmlLines(file);
+      const p=parsePlanText(lines);
+      if(p.rate==null&&!p.directWon)throw new Error('기안서에서 예상직접비(율)를 찾지 못했습니다. "기안 비용률 직접 입력"을 이용하세요.');
+      openPlanConfirm(p,file.name);
+    }else if(ext==='pdf'){
+      const p=parsePmsLines(await extractPdfLines(file));
+      if(!p.subs.length)throw new Error('PMS 예산/집행 요약표(조사의뢰코드별 행)를 찾지 못했습니다.');
+      openPmsConfirm(p,file.name);
+    }else{
+      const rows=await extractSheetRows(file);
+      const p=parsePmsLines(rows.map(r=>r.filter(Boolean).join(' ')));
+      if(p.subs.length)openPmsConfirm(p,file.name);
+      else openPmsColumnMap(rows,file.name);
+    }
+  }catch(err){showToast(err.message||'파일을 읽지 못했습니다.','error');}
+}
+
+// ── 확인 화면: 표준기안 ──
+function openPlanConfirm(p,fileName){
+  CHECK_DRAFT={kind:'plan',p,fileName};
+  const bidIdx=matchWonBid(p.name,p.contractWon);
+  document.getElementById('check-confirm-title').textContent='표준기안 읽기 결과 확인';
+  document.getElementById('check-confirm-body').innerHTML=`
+    <p class="text-sm text-muted mb16">파일: ${escH(fileName)} · 값이 맞는지 확인하고 필요하면 고쳐 주세요.</p>
+    <div class="form-group"><label class="form-label">프로젝트 *</label><select id="cc-project">${wonBidOptions(bidIdx)}</select>
+      <div class="text-sm text-muted" style="margin-top:4px;">기안서의 조사명: ${escH(p.name||'—')}${p.client?' · 발주처 '+escH(p.client):''}</div></div>
+    <div class="form-row col2">
+      <div class="form-group"><label class="form-label">계약금액 (VAT 별도, 원)</label><input type="text" id="cc-contract" value="${p.contractWon||''}" oninput="calcPlanConfirm()"></div>
+      <div class="form-group"><label class="form-label">예상 직접비 (원)</label><input type="text" id="cc-direct" value="${p.directWon||''}" oninput="calcPlanConfirm()"></div>
+    </div>
+    <div class="calc-result">표준기안 비용률: <span id="cc-rate">—</span>${p.statedRate!=null?` <span class="text-muted" style="font-weight:500;">(기안서 표기: 약 ${p.statedRate}%)</span>`:''}</div>
+    <div class="text-sm text-muted" style="margin-top:10px;line-height:1.6;">${p.docNo?'문서번호 '+escH(p.docNo)+' · ':''}${p.period?'계약기간 '+escH(p.period)+' · ':''}${p.outsourceWon?'외주경비 '+fmtWon(p.outsourceWon):''}</div>`;
+  calcPlanConfirm();openModal('check-confirm-modal');
+}
+function calcPlanConfirm(){
+  const c=parseWon(document.getElementById('cc-contract').value),d=parseWon(document.getElementById('cc-direct').value);
+  const rate=c&&d?d/c*100:(CHECK_DRAFT.p.statedRate??null);
+  document.getElementById('cc-rate').textContent=rate!=null?rate.toFixed(1)+'%':'—';
+  return{c,d,rate};
+}
+
+// ── 확인 화면: PMS ──
+function openPmsConfirm(p,fileName){
+  CHECK_DRAFT={kind:'pms',p,fileName};
+  const bidIdx=matchWonBid(p.title,p.contractWon);
+  document.getElementById('check-confirm-title').textContent='PMS 예산/집행 읽기 결과 확인';
+  document.getElementById('check-confirm-body').innerHTML=`
+    <p class="text-sm text-muted mb16">파일: ${escH(fileName)}${p.queryDate?' · 조회일 '+escH(p.queryDate):''}${p.settleMonth?' · 정산월 '+escH(p.settleMonth):''} · 금액이 맞는지 확인하고 필요하면 고쳐 주세요.</p>
+    <div class="form-group"><label class="form-label">프로젝트 *</label><select id="cc-project">${wonBidOptions(bidIdx)}</select>
+      <div class="text-sm text-muted" style="margin-top:4px;">파일의 조사명: ${escH(p.title||'—')}${p.contractWon?' · 총계약금액 '+fmtWonMan(p.contractWon):''}</div></div>
+    <div class="table-wrap"><table class="comp-table">
+      <thead><tr><th class="left">세부 조사</th><th>실사예산 (원)</th><th>누계 집행액 (원)</th></tr></thead>
+      <tbody>${p.subs.map((s,i)=>`<tr><td class="left">${escH(s.code?s.code+' · ':'')}${escH(s.name)}</td>
+        <td><input type="text" id="cc-b-${i}" value="${s.budget??''}" style="text-align:right;"></td>
+        <td><input type="text" id="cc-s-${i}" value="${s.spent??''}" style="text-align:right;"></td></tr>`).join('')}</tbody>
+    </table></div>`;
+  openModal('check-confirm-modal');
+}
+
+// ── 엑셀 칸 직접 고르기 (처음 보는 형식일 때) ──
+function colLetter(i){let s='';i++;while(i>0){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=Math.floor((i-1)/26);}return s;}
+function openPmsColumnMap(rows,fileName){
+  const width=Math.max(0,...rows.slice(0,200).map(r=>r.length));
+  let saved={};try{saved=JSON.parse(localStorage.getItem(PMS_COLMAP_KEY)||'{}');}catch(e){}
+  const opts=sel=>'<option value="">—</option>'+Array.from({length:width},(_,i)=>`<option value="${i}" ${String(sel)===String(i)?'selected':''}>${colLetter(i)}열</option>`).join('');
+  CHECK_DRAFT={kind:'pmsmap',rows,fileName};
+  document.getElementById('check-confirm-title').textContent='엑셀 칸 지정';
+  document.getElementById('check-confirm-body').innerHTML=`
+    <p class="text-sm text-muted mb16">처음 보는 형식이라 자동으로 읽지 못했습니다. 아래 미리보기를 보고 각 항목이 들어 있는 칸을 골라 주세요. 한 번 고르면 다음부터 기억합니다.</p>
+    <div class="form-row col3">
+      <div class="form-group"><label class="form-label">세부 조사명</label><select id="cm-name">${opts(saved.name)}</select></div>
+      <div class="form-group"><label class="form-label">실사예산</label><select id="cm-budget">${opts(saved.budget)}</select></div>
+      <div class="form-group"><label class="form-label">누계 집행액</label><select id="cm-spent">${opts(saved.spent)}</select></div>
+    </div>
+    <div class="table-wrap" style="max-height:260px;overflow:auto;"><table class="comp-table">
+      <thead><tr><th>행</th>${Array.from({length:width},(_,i)=>`<th>${colLetter(i)}</th>`).join('')}</tr></thead>
+      <tbody>${rows.slice(0,40).map((r,ri)=>`<tr><td>${ri+1}</td>${Array.from({length:width},(_,i)=>`<td class="left">${escH(r[i]||'')}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table></div>`;
+  openModal('check-confirm-modal');
+}
+function applyPmsColumnMap(){
+  const g=id=>document.getElementById(id).value;
+  const map={name:g('cm-name'),budget:g('cm-budget'),spent:g('cm-spent')};
+  if(map.name===''||map.budget===''||map.spent===''){showToast('세 칸을 모두 골라 주세요.','error');return;}
+  try{localStorage.setItem(PMS_COLMAP_KEY,JSON.stringify(map));}catch(e){}
+  const subs=CHECK_DRAFT.rows.map(r=>({name:r[map.name],budget:parseWon(r[map.budget]),spent:parseWon(r[map.spent])}))
+    .filter(s=>s.name&&!/합계|소계|총계/.test(s.name)&&(s.budget!=null||s.spent!=null));
+  if(!subs.length){showToast('선택한 칸에서 금액을 찾지 못했습니다.','error');return;}
+  closeModal('check-confirm-modal');
+  openPmsConfirm({title:CHECK_DRAFT.fileName.replace(/\.[^.]+$/,''),contractWon:null,queryDate:null,settleMonth:null,subs},CHECK_DRAFT.fileName);
+}
+
+function saveCheckConfirm(){
+  if(CHECK_DRAFT&&CHECK_DRAFT.kind==='pmsmap'){applyPmsColumnMap();return;}
+  const idx=parseInt(document.getElementById('cc-project').value,10);
+  if(isNaN(idx)){showToast('프로젝트를 선택하세요.','error');return;}
+  const {p,fileName}=CHECK_DRAFT;
+  if(CHECK_DRAFT.kind==='plan'){
+    const {c,d,rate}=calcPlanConfirm();
+    if(rate==null){showToast('예상 직접비를 확인하세요.','error');return;}
+    upsertCheck(idx,{plan:{contractWon:c||null,directWon:d||null,rate,statedRate:p.statedRate,outsourceWon:p.outsourceWon||null,docNo:p.docNo||null,period:p.period||null,source:'file',fileName,savedAt:new Date().toISOString()}});
+  }else{
+    const subs=p.subs.map((s,i)=>({...s,budget:parseWon(document.getElementById('cc-b-'+i).value)||0,spent:parseWon(document.getElementById('cc-s-'+i).value)||0}));
+    upsertCheck(idx,{pms:{fileName,queryDate:p.queryDate||new Date().toISOString().slice(0,10),settleMonth:p.settleMonth||null,contractWon:p.contractWon||null,subs,uploadedAt:new Date().toISOString()}});
+  }
+  saveLS();closeModal('check-confirm-modal');renderCosts();
+  const ck=getCostChecks().find(x=>x.bidIdx===idx);const r=calcCostCheck(ck);
+  if(r.status==='warn')showToast(`⚠ 경고: 예상 비용률 ${fmtPct(r.forecastRate)}로 기안(${fmtPct(r.planRate)})보다 ${fmtGap(r.gap)} 높습니다.`,'error');
+  else showToast('반영했습니다.','success');
+}
+
+// ── 상세 보기 ──
+function openCheckDetail(i){
+  const ck=getCostChecks()[i];if(!ck)return;
+  const r=calcCostCheck(ck);const subs=(ck.pms&&ck.pms.subs)||[];
+  document.getElementById('check-detail-title').textContent=ck.사업명;
+  document.getElementById('check-detail-body').innerHTML=`
+    <div class="comp-score-price-grid mb16">
+      <div class="comp-score-stat"><div class="stat-label">표준기안 비용률</div><div class="fw" style="font-size:20px;">${fmtPct(r.planRate)}</div><div class="text-sm text-muted">${ck.plan?(ck.plan.directWon?'예상직접비 '+fmtWonMan(ck.plan.directWon):'직접 입력')+(ck.plan.fileName?' · '+escH(ck.plan.fileName):''):'미입력'}</div></div>
+      <div class="comp-score-stat"><div class="stat-label">예상 비용률</div><div class="fw" style="font-size:20px;${r.status==='warn'?'color:var(--danger)':''}">${fmtPct(r.forecastRate)} <span style="font-size:13px;">${fmtGap(r.gap)}</span></div><div class="text-sm text-muted">현재 집행률 ${fmtPct(r.currentRate)}</div></div>
+    </div>
+    <div class="text-sm" style="line-height:1.7;margin-bottom:12px;">
+      예상 비용 = PMS 예상 실사비 ${fmtWonMan(r.pmsForecast)} + 기타추가경비·간접비·추가예상비용 ${fmtWonMan(r.otherWon)}<br>
+      분모(계약금액, VAT 제외) = ${fmtWonMan(r.contract)}${ck.pms&&ck.pms.queryDate?'<br>PMS 조회일 '+escH(ck.pms.queryDate)+(ck.pms.fileName?' · '+escH(ck.pms.fileName):''):''}
+    </div>
+    ${subs.length?`<div class="table-wrap"><table class="comp-table"><thead><tr><th class="left">세부 조사</th><th>실사예산</th><th>누계 집행</th><th>남은 예산</th><th>예상</th><th>참고</th></tr></thead><tbody>
+      ${subs.map(s=>{const over=(s.spent||0)>(s.budget||0);return`<tr><td class="left">${escH(s.name)}</td><td>${fmtWonMan(s.budget)}</td><td>${fmtWonMan(s.spent)}</td><td>${fmtWonMan(Math.max((s.budget||0)-(s.spent||0),0))}</td><td>${fmtWonMan(Math.max(s.budget||0,s.spent||0))}</td><td>${over?`<span class="cost-ref">예산 ${s.budget?Math.round(s.spent/s.budget*100)+'%':''} 집행</span>`:'—'}</td></tr>`;}).join('')}
+      <tr class="our-row"><td class="left">합계</td><td>${fmtWonMan(r.budget)}</td><td>${fmtWonMan(r.spent)}</td><td>${fmtWonMan(Math.max(r.pmsForecast-r.spent,0))}</td><td>${fmtWonMan(r.pmsForecast)}</td><td></td></tr>
+    </tbody></table></div>`:'<div class="no-data-note">PMS 예산/집행 파일을 올리면 예상 비용률이 계산됩니다.</div>'}`;
+  openModal('check-detail-modal');
 }
 
 function renderPage(n){if(n==='home')renderHome();else if(n==='bids')renderBids();else if(n==='competitor')renderCompetitor();else if(n==='revenue')renderRevenue();else if(n==='contacts')renderContacts();else if(n==='costs')renderCosts();else if(n==='data')updateDataSummary();}
