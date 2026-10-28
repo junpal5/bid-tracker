@@ -564,7 +564,6 @@ td .btn-icon{padding:2px 6px;font-size:13px;line-height:1.4}
   <div class="page-header">
     <div class="page-header-left"><h2>📊 전체 현황 요약</h2><p id="homeDate"></p></div>
   </div>
-  <div id="home-cost-alert"></div>
   <div class="filter-row mb16">
     <span class="filter-label">연도</span>
     <div class="tab-filters" id="home-year-tabs">
@@ -2446,7 +2445,6 @@ async function deleteContact(idx){const c=DB.contacts[idx];if(!(await askConfirm
 //  RENDER HOME
 // ════════════════════════════════
 function renderHome(){
-  renderCostAlert('home-cost-alert');
   const now=new Date();
   const hy=HF.year; // 홈 연도 필터 ('all' 또는 특정 연도)
 
@@ -3156,7 +3154,7 @@ function getCostWarnings(){
   return getCostChecks().map(ck=>({ck,r:calcCostCheck(ck)})).filter(x=>x.r.status==='warn');
 }
 
-// ── 경고 표시 (홈 상단 · 비용률 화면 상단) ──
+// ── 경고 표시 (비용률 화면 상단) ──
 function renderCostAlert(elId){
   const el=document.getElementById(elId);if(!el)return;
   if(!isCostUnlocked()){
@@ -3165,7 +3163,7 @@ function renderCostAlert(elId){
     return;
   }
   const warns=getCostWarnings();
-  el.innerHTML=warns.length?`<div class="cost-alert"><strong>⚠ 비용률 경고 ${warns.length}건</strong><span>${warns.map(({ck,r})=>`${escH(ck.사업명)} — 예상 ${fmtPct(r.forecastRate)} / 기안 ${fmtPct(r.planRate)} (${fmtGap(r.gap)})`).join('<br>')}</span>${elId==='home-cost-alert'?'<a href="#" onclick="tryOpenCosts(event);return false;">비용률 점검 보기 →</a>':''}</div>`:'';
+  el.innerHTML=warns.length?`<div class="cost-alert"><strong>⚠ 비용률 경고 ${warns.length}건</strong><span>${warns.map(({ck,r})=>`${escH(ck.사업명)} — 예상 ${fmtPct(r.forecastRate)} / 기안 ${fmtPct(r.planRate)} (${fmtGap(r.gap)})`).join('<br>')}</span></div>`:'';
 }
 
 function renderCostChecks(){
