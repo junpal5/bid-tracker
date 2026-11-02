@@ -3316,20 +3316,61 @@ function parsePmsLines(lines){
     subs.push({code:x[1],name:names[x[1]]||x[2].trim(),alloc:parseWon(x[3]),budget:parseWon(x[4]),spent:parseWon(x[5])});
   });
   const q=t.match(/조회일\s*(\d{4}[-.]\d{2}[-.]\d{2})/),s=t.match(/정산월\s*([\d.]+)/),c=t.match(/총\s*계약\s*금액\s*([\d,]+)\s*원/);
+  if(!subs.length){const one=parsePmsSingleSub(lines);if(one)return one;}
   return{title,contractWon:c?parseWon(c[1]):null,queryDate:q?q[1]:null,settleMonth:s?s[1]:null,subs};
+}
+// ── PMS 세부조사별 「예산/집행서」 읽기 (파일 하나 = 세부조사 하나) ──
+//  제목 예: "2026 경기 라이프 서베이 조사 용역_본조사(2026-423-006-01)"
+//  실사예산 = 전체예산합계(없으면 실사예산합계), 누계 집행액 = 누계 집행결과의 '합계' 행
+function parsePmsSingleSub(lines){
+  const t=lines.join('\n');
+  let head=null;
+  for(const l of lines){const x=l.match(/^(.*?)\s*[_＿]\s*([^_＿()]+?)\s*\(\s*(\d{4}-\d{3}-\d{3}-\d{2})\s*\)/);if(x){head=x;break;}}
+  if(!head||!/누계\s*집행/.test(t))return null;
+  const num=re=>{const x=t.match(re);return x?parseWon(x[1]):null;};
+  const budget=num(/전체\s*예산\s*합계\s*([\d,]+)/)??num(/실사\s*예산\s*합계\s*([\d,]+)/);
+  const at=lines.findIndex(l=>/누계\s*집행\s*결과/.test(l));
+  let spent=null;
+  lines.slice(at<0?0:at).forEach(l=>{const x=l.match(/^합\s*계\s+([\d,]+)/);if(x)spent=parseWon(x[1]);});
+  if(budget==null&&spent==null)return null;
+  return{title:head[1].trim(),contractWon:num(/총\s*계약\s*금액\s*([\d,]+)/),queryDate:null,settleMonth:null,partial:true,
+    subs:[{code:head[3],name:head[2].trim(),alloc:num(/조사\s*할당\s*금액\s*([\d,]+)/),budget:budget||0,spent:spent||0}]};
+}
+// 여러 PMS 파일 결과를 하나로 합치기 (같은 조사의뢰코드는 나중 파일 우선)
+function mergePmsResults(list){
+  const subs=[];
+  list.forEach(p=>p.subs.forEach(s=>{const i=subs.findIndex(x=>x.code&&x.code===s.code);if(i>=0)subs[i]=s;else subs.push(s);}));
+  subs.sort((a,b)=>String(a.code||'').localeCompare(String(b.code||'')));
+  const f=list[0];
+  return{title:f.title,contractWon:list.map(p=>p.contractWon).find(Boolean)||null,queryDate:list.map(p=>p.queryDate).find(Boolean)||null,
+    settleMonth:list.map(p=>p.settleMonth).find(Boolean)||null,partial:list.every(p=>p.partial),subs};
 }
 
 function pickCheckFile(kind){
   CHECK_KIND=kind;
   const inp=document.getElementById('check-file-input');
   inp.accept=kind==='plan'?'.pdf,.html,.htm':'.xlsx,.xls,.csv,.pdf';
+  inp.multiple=kind!=='plan';
   inp.value='';inp.click();
 }
 async function onCheckFile(e){
-  const file=e.target.files&&e.target.files[0];if(!file)return;
+  const files=[...(e.target.files||[])];if(!files.length)return;
+  const file=files[0];
   const ext=(file.name.split('.').pop()||'').toLowerCase();
   showToast('파일을 읽는 중입니다…','success');
   try{
+    if(CHECK_KIND!=='plan'&&files.length>1){
+      // 세부조사별 PDF 여러 개를 한 번에 올린 경우
+      const results=[];
+      for(const f of files){
+        if(!/\.pdf$/i.test(f.name))throw new Error('여러 파일을 한 번에 올릴 때는 PDF만 가능합니다: '+f.name);
+        const p=parsePmsLines(await extractPdfLines(f));
+        if(!p.subs.length)throw new Error('PMS 예산/집행 내용을 찾지 못했습니다: '+f.name);
+        results.push(p);
+      }
+      openPmsConfirm(mergePmsResults(results),files.map(f=>f.name).join(', '));
+      return;
+    }
     if(CHECK_KIND==='plan'){
       const lines=ext==='pdf'?await extractPdfLines(file):await extractHtmlLines(file);
       const p=parsePlanText(lines);
@@ -3337,7 +3378,7 @@ async function onCheckFile(e){
       openPlanConfirm(p,file.name);
     }else if(ext==='pdf'){
       const p=parsePmsLines(await extractPdfLines(file));
-      if(!p.subs.length)throw new Error('PMS 예산/집행 요약표(조사의뢰코드별 행)를 찾지 못했습니다.');
+      if(!p.subs.length)throw new Error('PMS 예산/집행 내용(조사의뢰코드별 요약표 또는 세부조사별 예산/집행서)을 찾지 못했습니다.');
       openPmsConfirm(p,file.name);
     }else{
       const rows=await extractSheetRows(file);
@@ -3381,6 +3422,7 @@ function openPmsConfirm(p,fileName){
     <p class="text-sm text-muted mb16">파일: ${escH(fileName)}${p.queryDate?' · 조회일 '+escH(p.queryDate):''}${p.settleMonth?' · 정산월 '+escH(p.settleMonth):''} · 금액이 맞는지 확인하고 필요하면 고쳐 주세요.</p>
     <div class="form-group"><label class="form-label">프로젝트 *</label><select id="cc-project">${wonBidOptions(bidIdx)}</select>
       <div class="text-sm text-muted" style="margin-top:4px;">파일의 조사명: ${escH(p.title||'—')}${p.contractWon?' · 총계약금액 '+fmtWonMan(p.contractWon):''}</div></div>
+    ${p.partial?'<p class="text-sm text-muted mb16">세부조사별 예산/집행서입니다. 이미 등록된 다른 세부조사는 그대로 두고, 같은 세부조사(조사의뢰코드)만 새 값으로 바꿉니다.</p>':''}
     <div class="table-wrap"><table class="comp-table">
       <thead><tr><th class="left">세부 조사</th><th>실사예산 (원)</th><th>누계 집행액 (원)</th></tr></thead>
       <tbody>${p.subs.map((s,i)=>`<tr><td class="left">${escH(s.code?s.code+' · ':'')}${escH(s.name)}</td>
@@ -3433,7 +3475,13 @@ function saveCheckConfirm(){
     if(rate==null){showToast('예상 직접비를 확인하세요.','error');return;}
     upsertCheck(idx,{plan:{contractWon:c||null,directWon:d||null,rate,statedRate:p.statedRate,outsourceWon:p.outsourceWon||null,docNo:p.docNo||null,period:p.period||null,source:'file',fileName,savedAt:new Date().toISOString()}});
   }else{
-    const subs=p.subs.map((s,i)=>({...s,budget:parseWon(document.getElementById('cc-b-'+i).value)||0,spent:parseWon(document.getElementById('cc-s-'+i).value)||0}));
+    let subs=p.subs.map((s,i)=>({...s,budget:parseWon(document.getElementById('cc-b-'+i).value)||0,spent:parseWon(document.getElementById('cc-s-'+i).value)||0}));
+    const prevCk=getCostChecks().find(x=>x.bidIdx===idx);
+    if(p.partial&&prevCk&&prevCk.pms&&Array.isArray(prevCk.pms.subs)){
+      // 세부조사별 파일: 기존 세부조사는 유지하고 같은 코드만 교체
+      const merged=prevCk.pms.subs.filter(x=>!subs.some(n=>n.code&&n.code===x.code));
+      subs=merged.concat(subs).sort((a,b)=>String(a.code||'').localeCompare(String(b.code||'')));
+    }
     upsertCheck(idx,{pms:{fileName,queryDate:p.queryDate||new Date().toISOString().slice(0,10),settleMonth:p.settleMonth||null,contractWon:p.contractWon||null,subs,uploadedAt:new Date().toISOString()}});
   }
   saveLS();closeModal('check-confirm-modal');renderCosts();
